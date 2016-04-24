@@ -9,6 +9,7 @@ type Client struct {
 }
 
 var client *Client
+var metricURL = "goniplus.layer123.io:9900"
 
 // InitSDK initialize goniplus sdk client
 func InitSDK(apikey string, interval int) {
