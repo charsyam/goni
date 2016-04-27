@@ -25,7 +25,7 @@ func sendMetricData(data []byte) bool {
 // every `sendInterval` second
 func (c *Client) startSender() {
 	for range time.Tick(c.sendInterval) {
-		data, err := getMetric()
+		data, err := getMetric(c.apikey)
 		if err != nil {
 			log.Println(err)
 			continue

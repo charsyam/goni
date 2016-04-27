@@ -16,6 +16,7 @@ type SystemMetric struct {
 
 // Metric contains SystemMetric and timestamp
 type Metric struct {
+	APIKey    string       `json:"apikey"`
 	System    SystemMetric `json:"sys"`
 	Timestamp string       `json:"time"`
 }
@@ -33,8 +34,9 @@ func getSystemMetric() SystemMetric {
 	return metric
 }
 
-func getMetric() ([]byte, error) {
+func getMetric(apikey string) ([]byte, error) {
 	metric := Metric{
+		APIKey:    apikey,
 		System:    getSystemMetric(),
 		Timestamp: getTimestamp(),
 	}
