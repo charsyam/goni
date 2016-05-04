@@ -24,8 +24,16 @@ func sendMetricData(data []byte) bool {
 // startSender starts timer for sending metrics to server
 // every `sendInterval` second
 func (c *Client) startSender() {
+	cnt := 0
 	for range time.Tick(c.sendInterval) {
-		data, err := getMetric(c.apikey)
+		updateInstanceID := false
+		if cnt == 5 {
+			updateInstanceID = true
+			cnt = 0
+		} else {
+			cnt++
+		}
+		data, err := c.getMetric(updateInstanceID)
 		if err != nil {
 			log.Println(err)
 			continue
