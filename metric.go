@@ -2,6 +2,7 @@ package goniplus
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 )
 
@@ -22,9 +23,13 @@ type Metric struct {
 	Timestamp string       `json:"time"`
 }
 
-// getTime() returns RFC3339 Timestamp string
+// getTimestamp() returns RFC3339 Timestamp string
 func getTimestamp() string {
 	return time.Now().Format(time.RFC3339)
+}
+
+func getUnixTimestamp() string {
+	return strconv.FormatInt(time.Now().Unix(), 10)
 }
 
 func getSystemMetric() SystemMetric {
