@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+// ApplicationMetric contains http data
+type ApplicationMetric struct {
+	HTTP map[string]map[string]map[string][]RequestData `json:"http"`
+}
+
 // SystemMetric contains expvar data and runtime data
 //
 // Expvar : Alloc / Sys / HeapAlloc / HeapInuse / PauseTotalNs / NumGC
@@ -17,10 +22,11 @@ type SystemMetric struct {
 
 // Metric contains SystemMetric and timestamp
 type Metric struct {
-	APIKey    string       `json:"apikey"`
-	Instance  string       `json:"instance"`
-	System    SystemMetric `json:"sys"`
-	Timestamp string       `json:"time"`
+	APIKey      string            `json:"apikey"`
+	Application ApplicationMetric `json:"app"`
+	Instance    string            `json:"instance"`
+	System      SystemMetric      `json:"sys"`
+	Timestamp   string            `json:"time"`
 }
 
 // getTimestamp() returns RFC3339 Timestamp string
@@ -30,6 +36,13 @@ func getTimestamp() string {
 
 func getUnixTimestamp() string {
 	return strconv.FormatInt(time.Now().Unix(), 10)
+}
+
+func getApplicationMetric() ApplicationMetric {
+	metric := ApplicationMetric{
+		HTTP: getHTTPResponseMetric(),
+	}
+	return metric
 }
 
 func getSystemMetric() SystemMetric {
@@ -45,10 +58,11 @@ func (c *Client) getMetric(update bool) ([]byte, error) {
 		c.id = getInstanceID()
 	}
 	metric := Metric{
-		APIKey:    c.apikey,
-		Instance:  c.id,
-		System:    getSystemMetric(),
-		Timestamp: getTimestamp(),
+		APIKey:      c.apikey,
+		Application: getApplicationMetric(),
+		Instance:    c.id,
+		System:      getSystemMetric(),
+		Timestamp:   getTimestamp(),
 	}
 	data, err := json.Marshal(metric)
 	return data, err
