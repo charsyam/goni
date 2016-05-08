@@ -21,6 +21,7 @@ type Request struct {
 
 // RequestData contains response time with timestamp
 type RequestData struct {
+	Recovered    bool   `json:"recovered,omitempty"`
 	ResponseTime int64  `json:"res"`
 	Timestamp    string `json:"time"`
 }
@@ -66,15 +67,15 @@ func startRequestTrack(r *http.Request) *Request {
 }
 
 // finishRequestTrack finishes request tracking
-func (r *Request) finishRequestTrack(status int) {
+func (r *Request) finishRequestTrack(status int, recovered bool) {
 	t := time.Now()
 	r.responseTime = int64(t.Sub(r.start) / time.Millisecond)
 	r.finishedAt = strconv.FormatInt(t.Unix(), 10)
 	r.response = strconv.Itoa(status)
-	r.addRequestData()
+	r.addRequestData(recovered)
 }
 
-func (r *Request) addRequestData() {
+func (r *Request) addRequestData(recovered bool) {
 	reqMapLock.Lock()
 	if mP, ok := reqMap[r.path]; !ok {
 		mP = make(map[string]map[string][]RequestData)
@@ -85,6 +86,7 @@ func (r *Request) addRequestData() {
 		reqMap[r.path][r.method] = mM
 	}
 	reqMap[r.path][r.method][r.response] = append(reqMap[r.path][r.method][r.response], RequestData{
+		Recovered:    recovered,
 		ResponseTime: r.responseTime,
 		Timestamp:    getUnixTimestamp(),
 	})
