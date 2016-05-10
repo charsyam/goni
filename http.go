@@ -21,14 +21,17 @@ type Request struct {
 
 // RequestData contains response time with timestamp
 type RequestData struct {
-	Panic        bool   `json:"panic,omitempty"`
-	ResponseTime int64  `json:"res"`
-	Timestamp    string `json:"time"`
+	Breadcrumb   []string `json:"crumb,omitempty"`
+	Panic        bool     `json:"panic,omitempty"`
+	ResponseTime int64    `json:"res"`
+	Timestamp    string   `json:"time"`
 }
 
 // Path > Method > RequestData
 var reqMap = make(map[string]map[string]map[string][]RequestData)
 var reqMapLock = &sync.Mutex{}
+var reqTrackMap = make(map[string][]string)
+var reqTrackMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
 	reqMap = make(map[string]map[string]map[string][]RequestData)
@@ -66,6 +69,19 @@ func startRequestTrack(r *http.Request) *Request {
 	return req
 }
 
+// LeaveBreadcrumb add specified tag to array
+func LeaveBreadcrumb(r *http.Request, tag string) {
+	// Get tracking id from header
+	id := r.Header.Get("Goni-tracking-id")
+	reqTrackMapLock.Lock()
+	defer reqTrackMapLock.Unlock()
+	if arr, ok := reqTrackMap[id]; !ok {
+		arr = make([]string, 0)
+		reqTrackMap[id] = arr
+	}
+	reqTrackMap[id] = append(reqTrackMap[id], tag)
+}
+
 // finishRequestTrack finishes request tracking
 func (r *Request) finishRequestTrack(status int, panic bool) {
 	t := time.Now()
@@ -77,6 +93,7 @@ func (r *Request) finishRequestTrack(status int, panic bool) {
 
 func (r *Request) addRequestData(panic bool) {
 	reqMapLock.Lock()
+	defer reqMapLock.Unlock()
 	if mP, ok := reqMap[r.path]; !ok {
 		mP = make(map[string]map[string][]RequestData)
 		reqMap[r.path] = mP
@@ -85,10 +102,12 @@ func (r *Request) addRequestData(panic bool) {
 		mM = make(map[string][]RequestData)
 		reqMap[r.path][r.method] = mM
 	}
+	reqTrackMapLock.Lock()
+	defer reqTrackMapLock.Unlock()
 	reqMap[r.path][r.method][r.response] = append(reqMap[r.path][r.method][r.response], RequestData{
+		Breadcrumb:   reqTrackMap[r.id],
 		Panic:        panic,
 		ResponseTime: r.responseTime,
 		Timestamp:    getUnixTimestamp(),
 	})
-	reqMapLock.Unlock()
 }
