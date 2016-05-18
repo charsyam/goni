@@ -8,7 +8,8 @@ import (
 
 // ApplicationMetric contains http data
 type ApplicationMetric struct {
-	HTTP map[string]map[string]map[string][]RequestData `json:"http"`
+	Error map[string][]string                            `json:"err"`
+	HTTP  map[string]map[string]map[string][]RequestData `json:"http"`
 }
 
 // SystemMetric contains expvar data and runtime data
@@ -40,7 +41,8 @@ func getUnixTimestamp() string {
 
 func getApplicationMetric() ApplicationMetric {
 	metric := ApplicationMetric{
-		HTTP: getHTTPResponseMetric(),
+		Error: getErrorMetric(),
+		HTTP:  getHTTPResponseMetric(),
 	}
 	return metric
 }
