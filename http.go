@@ -110,4 +110,5 @@ func (r *Request) addRequestData(panic bool) {
 		ResponseTime: r.responseTime,
 		Timestamp:    getUnixTimestamp(),
 	})
+	delete(reqTrackMap, r.id)
 }
