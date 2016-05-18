@@ -21,34 +21,28 @@ type Request struct {
 	responseTime int64
 }
 
-// RequestData contains response time with timestamp
+// RequestData contains server response data
 type RequestData struct {
-	Browser map[string]map[string]int `json:"browser,omitempty"`
-	Detail  []RequestDetail           `json:"detail,omitempty"`
-}
-
-// RequestDetail contains response time with timestamp
-type RequestDetail struct {
 	Breadcrumb   []string `json:"crumb,omitempty"`
 	Panic        bool     `json:"panic,omitempty"`
 	ResponseTime int64    `json:"res"`
 	Timestamp    string   `json:"time"`
 }
 
-// Path > Method > Status > RequestData
-var reqMap = make(map[string]map[string]map[string]*RequestData)
+// Path > Method > Status > Browser > RequestData
+var reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
 var reqMapLock = &sync.Mutex{}
 var reqTrackMap = make(map[string][]string)
 var reqTrackMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
-	reqMap = make(map[string]map[string]map[string]*RequestData)
+	reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
 }
 
-func getHTTPResponseMetric() map[string]map[string]map[string]*RequestData {
+func getHTTPResponseMetric() map[string]map[string]map[string]map[string][]RequestData {
 	reqMapLock.Lock()
 	defer reqMapLock.Unlock()
-	respData := make(map[string]map[string]map[string]*RequestData, len(reqMap))
+	respData := make(map[string]map[string]map[string]map[string][]RequestData, len(reqMap))
 	for k, v := range reqMap {
 		respData[k] = v
 	}
@@ -105,31 +99,24 @@ func (r *Request) addRequestData(panic bool) {
 	defer reqMapLock.Unlock()
 	// Map check
 	if mP, ok := reqMap[r.path]; !ok {
-		mP = make(map[string]map[string]*RequestData)
+		mP = make(map[string]map[string]map[string][]RequestData)
 		reqMap[r.path] = mP
 	}
 	if mM, ok := reqMap[r.path][r.method]; !ok {
-		mM = make(map[string]*RequestData)
+		mM = make(map[string]map[string][]RequestData)
 		reqMap[r.path][r.method] = mM
 	}
-	if reqMap[r.path][r.method][r.response] == nil {
-		reqMap[r.path][r.method][r.response] = &RequestData{}
+	if mR, ok := reqMap[r.path][r.method][r.response]; !ok {
+		mR = make(map[string][]RequestData)
+		reqMap[r.path][r.method][r.response] = mR
 	}
 	// UserAgent
 	ua := user_agent.New(r.userAgent)
-	browser, browserVersion := ua.Browser()
-	if reqMap[r.path][r.method][r.response].Browser == nil {
-		m := make(map[string]map[string]int)
-		reqMap[r.path][r.method][r.response].Browser = m
-	}
-	if mB, ok := reqMap[r.path][r.method][r.response].Browser[browser]; !ok {
-		mB = make(map[string]int)
-		reqMap[r.path][r.method][r.response].Browser[browser] = mB
-	}
-	reqMap[r.path][r.method][r.response].Browser[browser][browserVersion]++
+	browserName, browserVersion := ua.Browser()
+	browser := fmt.Sprintf("%s_%s", browserName, browserVersion)
 	reqTrackMapLock.Lock()
 	defer reqTrackMapLock.Unlock()
-	reqMap[r.path][r.method][r.response].Detail = append(reqMap[r.path][r.method][r.response].Detail, RequestDetail{
+	reqMap[r.path][r.method][r.response][browser] = append(reqMap[r.path][r.method][r.response][browser], RequestData{
 		Breadcrumb:   reqTrackMap[r.id],
 		Panic:        panic,
 		ResponseTime: r.responseTime,
