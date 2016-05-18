@@ -8,8 +8,8 @@ import (
 
 // ApplicationMetric contains http data
 type ApplicationMetric struct {
-	Error map[string][]string                            `json:"err"`
-	HTTP  map[string]map[string]map[string][]RequestData `json:"http"`
+	Error map[string][]string                           `json:"err"`
+	HTTP  map[string]map[string]map[string]*RequestData `json:"http"`
 }
 
 // SystemMetric contains expvar data and runtime data

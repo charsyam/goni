@@ -2,6 +2,7 @@ package goniplus
 
 import (
 	"fmt"
+	"github.com/mssola/user_agent"
 	"net/http"
 	"strconv"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 // Request contains Random task id, tag and time information
 type Request struct {
+	userAgent    string
 	id           string
 	method       string
 	path         string
@@ -21,31 +23,37 @@ type Request struct {
 
 // RequestData contains response time with timestamp
 type RequestData struct {
+	Browser map[string]map[string]int `json:"browser,omitempty"`
+	Detail  []RequestDetail           `json:"detail,omitempty"`
+}
+
+// RequestDetail contains response time with timestamp
+type RequestDetail struct {
 	Breadcrumb   []string `json:"crumb,omitempty"`
 	Panic        bool     `json:"panic,omitempty"`
 	ResponseTime int64    `json:"res"`
 	Timestamp    string   `json:"time"`
 }
 
-// Path > Method > RequestData
-var reqMap = make(map[string]map[string]map[string][]RequestData)
+// Path > Method > Status > RequestData
+var reqMap = make(map[string]map[string]map[string]*RequestData)
 var reqMapLock = &sync.Mutex{}
 var reqTrackMap = make(map[string][]string)
 var reqTrackMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
-	reqMap = make(map[string]map[string]map[string][]RequestData)
+	reqMap = make(map[string]map[string]map[string]*RequestData)
 }
 
-func getHTTPResponseMetric() map[string]map[string]map[string][]RequestData {
+func getHTTPResponseMetric() map[string]map[string]map[string]*RequestData {
 	reqMapLock.Lock()
-	data := make(map[string]map[string]map[string][]RequestData, len(reqMap))
+	defer reqMapLock.Unlock()
+	respData := make(map[string]map[string]map[string]*RequestData, len(reqMap))
 	for k, v := range reqMap {
-		data[k] = v
+		respData[k] = v
 	}
 	initHTTPMap()
-	reqMapLock.Unlock()
-	return data
+	return respData
 }
 
 // Return request id (string) for request tracking
@@ -58,10 +66,11 @@ func createRequestID(m, p string) string {
 func startRequestTrack(r *http.Request) *Request {
 	// Create Request for tracking request
 	req := &Request{
-		id:     createRequestID(r.Method, r.URL.String()),
-		method: r.Method,
-		path:   r.URL.String(),
-		start:  time.Now(),
+		id:        createRequestID(r.Method, r.URL.String()),
+		method:    r.Method,
+		path:      r.URL.String(),
+		start:     time.Now(),
+		userAgent: r.Header.Get("User-Agent"),
 	}
 	// Add id to request header for tracking breadcrumb inside request
 	r.Header.Add("Goni-tracking-id", req.id)
@@ -94,17 +103,33 @@ func (r *Request) finishRequestTrack(status int, panic bool) {
 func (r *Request) addRequestData(panic bool) {
 	reqMapLock.Lock()
 	defer reqMapLock.Unlock()
+	// Map check
 	if mP, ok := reqMap[r.path]; !ok {
-		mP = make(map[string]map[string][]RequestData)
+		mP = make(map[string]map[string]*RequestData)
 		reqMap[r.path] = mP
 	}
 	if mM, ok := reqMap[r.path][r.method]; !ok {
-		mM = make(map[string][]RequestData)
+		mM = make(map[string]*RequestData)
 		reqMap[r.path][r.method] = mM
 	}
+	if reqMap[r.path][r.method][r.response] == nil {
+		reqMap[r.path][r.method][r.response] = &RequestData{}
+	}
+	// UserAgent
+	ua := user_agent.New(r.userAgent)
+	browser, browserVersion := ua.Browser()
+	if reqMap[r.path][r.method][r.response].Browser == nil {
+		m := make(map[string]map[string]int)
+		reqMap[r.path][r.method][r.response].Browser = m
+	}
+	if mB, ok := reqMap[r.path][r.method][r.response].Browser[browser]; !ok {
+		mB = make(map[string]int)
+		reqMap[r.path][r.method][r.response].Browser[browser] = mB
+	}
+	reqMap[r.path][r.method][r.response].Browser[browser][browserVersion]++
 	reqTrackMapLock.Lock()
 	defer reqTrackMapLock.Unlock()
-	reqMap[r.path][r.method][r.response] = append(reqMap[r.path][r.method][r.response], RequestData{
+	reqMap[r.path][r.method][r.response].Detail = append(reqMap[r.path][r.method][r.response].Detail, RequestDetail{
 		Breadcrumb:   reqTrackMap[r.id],
 		Panic:        panic,
 		ResponseTime: r.responseTime,
