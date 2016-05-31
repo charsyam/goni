@@ -124,3 +124,56 @@ func (r *Request) addRequestData(panic bool) {
 	})
 	delete(reqTrackMap, r.id)
 }
+
+/*
+ * net/http middleware
+ */
+
+// ResponseWriterWrapper wrap ResponseWriter for net/http middleware support
+type ResponseWriterWrapper struct {
+	w      http.ResponseWriter
+	status int
+	size   int
+}
+
+// Header is implementaion of net/http ResponseWriter Header()
+func (rww *ResponseWriterWrapper) Header() http.Header {
+	return rww.w.Header()
+}
+
+// Write is implementaion of snet/http ResponseWriter Write()
+func (rww *ResponseWriterWrapper) Write(b []byte) (int, error) {
+	if rww.status == 0 {
+		rww.status = http.StatusOK
+	}
+	size, err := rww.w.Write(b)
+	rww.size += size
+	return size, err
+}
+
+// WriteHeader sets the header with status
+func (rww *ResponseWriterWrapper) WriteHeader(s int) {
+	rww.w.WriteHeader(s)
+	rww.status = s
+}
+
+// Status returns the HTTP status code
+func (rww *ResponseWriterWrapper) Status() int {
+	return rww.status
+}
+
+// Middleware returns net/http middleware
+func Middleware(h http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t := StartRequestTrack(r)
+		defer func() {
+			if err := recover(); err != nil {
+				t.FinishRequestTrack(500, true)
+			}
+		}()
+		rww := &ResponseWriterWrapper{w: w}
+		h(rww, r)
+		fmt.Println(rww.status)
+		t.FinishRequestTrack(rww.status, false)
+	})
+}
