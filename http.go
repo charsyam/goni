@@ -56,8 +56,8 @@ func createRequestID(m, p string) string {
 	return id
 }
 
-// startRequestTrack starts request tracking
-func startRequestTrack(r *http.Request) *Request {
+// StartRequestTrack starts request tracking
+func StartRequestTrack(r *http.Request) *Request {
 	// Create Request for tracking request
 	req := &Request{
 		id:        createRequestID(r.Method, r.URL.String()),
@@ -85,8 +85,8 @@ func LeaveBreadcrumb(r *http.Request, tag string) {
 	reqTrackMap[id] = append(reqTrackMap[id], tag)
 }
 
-// finishRequestTrack finishes request tracking
-func (r *Request) finishRequestTrack(status int, panic bool) {
+// FinishRequestTrack finishes request tracking
+func (r *Request) FinishRequestTrack(status int, panic bool) {
 	t := time.Now()
 	r.responseTime = int64(t.Sub(r.start) / time.Millisecond)
 	r.finishedAt = strconv.FormatInt(t.Unix(), 10)
