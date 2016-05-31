@@ -3,7 +3,6 @@ package goniplus
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -32,7 +31,7 @@ func calcCPUUsage(fields []string) float64 {
 func getCPUUsage() (float64, error) {
 	d, err := ioutil.ReadFile("/proc/stat")
 	if err != nil {
-		log.Println(err)
+		return 0.0, errors.New("Cannot read CPU data")
 	}
 	data := string(d)
 	lines := strings.Split(data, "\n")
