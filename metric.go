@@ -17,8 +17,9 @@ type ApplicationMetric struct {
 // Expvar : Alloc / Sys / HeapAlloc / HeapInuse / PauseTotalNs / NumGC
 // Runtime : cgo / goroutine
 type SystemMetric struct {
-	Expvar  map[string]interface{} `json:"expvar"`
-	Runtime map[string]interface{} `json:"runtime"`
+	Expvar   map[string]interface{} `json:"expvar"`
+	Resource map[string]interface{} `json:"resource"`
+	Runtime  map[string]interface{} `json:"runtime"`
 }
 
 // Metric contains SystemMetric and timestamp
@@ -49,8 +50,9 @@ func getApplicationMetric() ApplicationMetric {
 
 func getSystemMetric() SystemMetric {
 	metric := SystemMetric{
-		Expvar:  getExpvar(),
-		Runtime: getRuntimeData(),
+		Expvar:   getExpvar(),
+		Resource: getResourceData(),
+		Runtime:  getRuntimeData(),
 	}
 	return metric
 }
