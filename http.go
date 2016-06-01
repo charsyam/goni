@@ -23,10 +23,11 @@ type Request struct {
 
 // RequestData contains server response data
 type RequestData struct {
-	Breadcrumb   []string `json:"crumb,omitempty"`
-	Panic        bool     `json:"panic,omitempty"`
-	ResponseTime int64    `json:"res"`
-	Timestamp    string   `json:"time"`
+	Breadcrumb     []string `json:"crumb,omitempty"`
+	BreadcrumbTime []int64  `json:"crumbT,omitempty"`
+	Panic          bool     `json:"panic,omitempty"`
+	ResponseTime   int64    `json:"res"`
+	Timestamp      string   `json:"time"`
 }
 
 // Path > Method > Status > Browser > RequestData
@@ -34,14 +35,22 @@ var reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
 var reqMapLock = &sync.Mutex{}
 var reqTrackMap = make(map[string][]string)
 var reqTrackMapLock = &sync.Mutex{}
+var reqTrackTimeMap = make(map[string][]time.Time)
+var reqTrackTimeMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
 	reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
+	reqTrackMap = make(map[string][]string)
+	reqTrackTimeMap = make(map[string][]time.Time)
 }
 
 func getHTTPResponseMetric() map[string]map[string]map[string]map[string][]RequestData {
 	reqMapLock.Lock()
 	defer reqMapLock.Unlock()
+	reqTrackMapLock.Lock()
+	defer reqTrackMapLock.Unlock()
+	reqTrackTimeMapLock.Lock()
+	defer reqTrackTimeMapLock.Unlock()
 	respData := make(map[string]map[string]map[string]map[string][]RequestData, len(reqMap))
 	for k, v := range reqMap {
 		respData[k] = v
@@ -77,12 +86,15 @@ func LeaveBreadcrumb(r *http.Request, tag string) {
 	// Get tracking id from header
 	id := r.Header.Get("Goni-tracking-id")
 	reqTrackMapLock.Lock()
-	defer reqTrackMapLock.Unlock()
 	if arr, ok := reqTrackMap[id]; !ok {
 		arr = make([]string, 0)
 		reqTrackMap[id] = arr
 	}
 	reqTrackMap[id] = append(reqTrackMap[id], tag)
+	reqTrackMapLock.Unlock()
+	reqTrackTimeMapLock.Lock()
+	reqTrackTimeMap[id] = append(reqTrackTimeMap[id], time.Now())
+	reqTrackTimeMapLock.Unlock()
 }
 
 // FinishRequestTrack finishes request tracking
@@ -114,15 +126,39 @@ func (r *Request) addRequestData(panic bool) {
 	ua := user_agent.New(r.userAgent)
 	browserName, browserVersion := ua.Browser()
 	browser := fmt.Sprintf("%s_%s", browserName, browserVersion)
+	reqTrackTimeMapLock.Lock()
+	var crumbT []int64
+	var totalD int64
+	crumbLen := len(reqTrackTimeMap[r.id])
+	for i := 0; i < crumbLen; i++ {
+		if i == 0 {
+			d := int64(reqTrackTimeMap[r.id][i].Sub(r.start) / time.Millisecond)
+			totalD += d
+			crumbT = append(crumbT, d)
+			if i == crumbLen-1 {
+				crumbT = append(crumbT, r.responseTime-totalD)
+			}
+			continue
+		}
+		d := int64(reqTrackTimeMap[r.id][i].Sub(reqTrackTimeMap[r.id][i-1]) / time.Millisecond)
+		crumbT = append(crumbT, d)
+		totalD += d
+		if i == crumbLen-1 {
+			crumbT = append(crumbT, r.responseTime-totalD)
+		}
+	}
+	delete(reqTrackTimeMap, r.id)
+	reqTrackTimeMapLock.Unlock()
 	reqTrackMapLock.Lock()
-	defer reqTrackMapLock.Unlock()
 	reqMap[r.path][r.method][r.response][browser] = append(reqMap[r.path][r.method][r.response][browser], RequestData{
-		Breadcrumb:   reqTrackMap[r.id],
-		Panic:        panic,
-		ResponseTime: r.responseTime,
-		Timestamp:    getUnixTimestamp(),
+		Breadcrumb:     reqTrackMap[r.id],
+		BreadcrumbTime: crumbT,
+		Panic:          panic,
+		ResponseTime:   r.responseTime,
+		Timestamp:      getUnixTimestamp(),
 	})
 	delete(reqTrackMap, r.id)
+	reqTrackMapLock.Unlock()
 }
 
 /*
@@ -173,7 +209,6 @@ func Middleware(h http.HandlerFunc) http.HandlerFunc {
 		}()
 		rww := &ResponseWriterWrapper{w: w}
 		h(rww, r)
-		fmt.Println(rww.status)
 		t.FinishRequestTrack(rww.status, false)
 	})
 }
