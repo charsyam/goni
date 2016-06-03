@@ -3,6 +3,7 @@ package goniplus
 import (
 	"fmt"
 	"github.com/mssola/user_agent"
+	"net"
 	"net/http"
 	"strconv"
 	"sync"
@@ -13,6 +14,7 @@ import (
 type Request struct {
 	userAgent    string
 	id           string
+	ip           string
 	method       string
 	path         string
 	start        time.Time
@@ -37,26 +39,35 @@ var reqTrackMap = make(map[string][]string)
 var reqTrackMapLock = &sync.Mutex{}
 var reqTrackTimeMap = make(map[string][]time.Time)
 var reqTrackTimeMapLock = &sync.Mutex{}
+var reqUserMap = make(map[string]bool)
+var reqUserMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
 	reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
 	reqTrackMap = make(map[string][]string)
 	reqTrackTimeMap = make(map[string][]time.Time)
+	reqUserMap = make(map[string]bool)
 }
 
-func getHTTPResponseMetric() map[string]map[string]map[string]map[string][]RequestData {
+func getHTTPResponseMetric() (map[string]map[string]map[string]map[string][]RequestData, []string) {
 	reqMapLock.Lock()
 	defer reqMapLock.Unlock()
 	reqTrackMapLock.Lock()
 	defer reqTrackMapLock.Unlock()
 	reqTrackTimeMapLock.Lock()
 	defer reqTrackTimeMapLock.Unlock()
+	reqUserMapLock.Lock()
+	defer reqUserMapLock.Unlock()
 	respData := make(map[string]map[string]map[string]map[string][]RequestData, len(reqMap))
 	for k, v := range reqMap {
 		respData[k] = v
 	}
+	var userData []string
+	for k := range reqUserMap {
+		userData = append(userData, k)
+	}
 	initHTTPMap()
-	return respData
+	return respData, userData
 }
 
 // Return request id (string) for request tracking
@@ -68,8 +79,10 @@ func createRequestID(m, p string) string {
 // StartRequestTrack starts request tracking
 func StartRequestTrack(r *http.Request) *Request {
 	// Create Request for tracking request
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	req := &Request{
 		id:        createRequestID(r.Method, r.URL.String()),
+		ip:        ip,
 		method:    r.Method,
 		path:      r.URL.String(),
 		start:     time.Now(),
@@ -126,6 +139,12 @@ func (r *Request) addRequestData(panic bool) {
 	ua := user_agent.New(r.userAgent)
 	browserName, browserVersion := ua.Browser()
 	browser := fmt.Sprintf("%s_%s", browserName, browserVersion)
+	// IP
+	reqUserMapLock.Lock()
+	if _, ok := reqUserMap[r.ip]; !ok {
+		reqUserMap[r.ip] = true
+	}
+	reqUserMapLock.Unlock()
 	reqTrackTimeMapLock.Lock()
 	var crumbT []int64
 	var totalD int64
