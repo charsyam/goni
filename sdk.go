@@ -45,8 +45,8 @@ func getInstanceID() string {
 	return getIP() + "-" + getPid()
 }
 
-// InitSDK initialize goniplus sdk client
-func InitSDK(apikey string, interval int) {
+// InitSDK initialize and returns goniplus sdk client
+func InitSDK(apikey string, interval int) *Client {
 	client = &Client{
 		apikey,
 		getInstanceID(),
@@ -56,4 +56,5 @@ func InitSDK(apikey string, interval int) {
 	initErrMap()
 	initHTTPMap()
 	go client.startSender()
+	return client
 }
