@@ -52,7 +52,7 @@ func initHTTPMap() {
 	reqUserMapLock.Unlock()
 }
 
-func getHTTPResponseMetric() (map[string]map[string]map[string]map[string][]RequestData, []string) {
+func GetHTTPResponseMetric() (map[string]map[string]map[string]map[string][]RequestData, []string) {
 	reqMapLock.Lock()
 	reqUserMapLock.Lock()
 	respData := make(map[string]map[string]map[string]map[string][]RequestData, len(client.tMetric.reqMap))
@@ -175,7 +175,7 @@ func (r *Request) addRequestData(panic bool) {
 			BreadcrumbTime: crumbT,
 			Panic:          panic,
 			ResponseTime:   r.responseTime,
-			Timestamp:      getUnixTimestamp(),
+			Timestamp:      GetUnixTimestamp(),
 		})
 	delete(client.tMetric.reqTrackMap, r.id)
 	reqTrackMapLock.Unlock()
