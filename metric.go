@@ -8,9 +8,10 @@ import (
 
 // tempMetric saves temporary data for calculating / collecting data
 type tempMetric struct {
+	errMap                   map[string][]string
+	isResourceInitialCollect bool
 	// prevCPUMetric saves calculated total, idle value for next calculation
 	prevCPUMetric localCPUMetric
-	errMap        map[string][]string
 	// Path > Method > Status > Browser > RequestData
 	reqMap          map[string]map[string]map[string]map[string][]RequestData
 	reqTrackMap     map[string][]string
@@ -65,7 +66,7 @@ func getApplicationMetric() ApplicationMetric {
 func getSystemMetric() SystemMetric {
 	metric := SystemMetric{
 		Expvar:   GetExpvar(),
-		Resource: getResourceData(),
+		Resource: GetResource(),
 		Runtime:  GetRuntime(),
 	}
 	return metric
