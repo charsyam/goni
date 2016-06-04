@@ -6,6 +6,18 @@ import (
 	"time"
 )
 
+// tempMetric saves temporary data for calculating / collecting data
+type tempMetric struct {
+	// prevCPUMetric saves calculated total, idle value for next calculation
+	prevCPUMetric localCPUMetric
+	errMap        map[string][]string
+	// Path > Method > Status > Browser > RequestData
+	reqMap          map[string]map[string]map[string]map[string][]RequestData
+	reqTrackMap     map[string][]string
+	reqTrackTimeMap map[string][]time.Time
+	reqUserMap      map[string]bool
+}
+
 // ApplicationMetric contains http data
 type ApplicationMetric struct {
 	Error map[string][]string                                       `json:"err"`
@@ -14,7 +26,6 @@ type ApplicationMetric struct {
 }
 
 // SystemMetric contains expvar data and runtime data
-//
 // Expvar : Alloc / Sys / HeapAlloc / HeapInuse / PauseTotalNs / NumGC
 // Runtime : cgo / goroutine
 type SystemMetric struct {

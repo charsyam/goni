@@ -12,9 +12,6 @@ type localCPUMetric struct {
 	total, idle uint64
 }
 
-// prevCPUMetric saves calculated total, idle value for next calculation
-var prevCPUMetric localCPUMetric
-
 // calcCPUUsage takes fields which parsed from /proc/stat,
 // and returns calculated CPU usage. (float64)
 func calcCPUUsage(fields []string) float64 {
@@ -26,9 +23,10 @@ func calcCPUUsage(fields []string) float64 {
 		}
 		total += u
 	}
+	prevCPUMetric := client.tMetric.prevCPUMetric
 	v := float64((total-prevCPUMetric.total)-(idle-prevCPUMetric.idle)) / float64(total-prevCPUMetric.total)
-	prevCPUMetric.idle = idle
-	prevCPUMetric.total = total
+	client.tMetric.prevCPUMetric.idle = idle
+	client.tMetric.prevCPUMetric.total = total
 	return v
 }
 

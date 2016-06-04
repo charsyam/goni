@@ -12,6 +12,7 @@ type Client struct {
 	apikey       string
 	id           string
 	sendInterval time.Duration
+	tMetric      *tempMetric
 }
 
 // Global GoniPlus client
@@ -50,6 +51,9 @@ func InitSDK(apikey string, interval int) {
 		apikey,
 		getInstanceID(),
 		time.Duration(interval) * time.Second,
+		&tempMetric{},
 	}
+	initErrMap()
+	initHTTPMap()
 	go client.startSender()
 }

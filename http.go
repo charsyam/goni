@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Request contains Random task id, tag and time information
+// Request is a type that wraps request information
 type Request struct {
 	userAgent    string
 	id           string
@@ -23,7 +23,7 @@ type Request struct {
 	responseTime int64
 }
 
-// RequestData contains server response data
+// RequestData is a type for keeping request tracking data
 type RequestData struct {
 	Breadcrumb     []string `json:"crumb,omitempty"`
 	BreadcrumbTime []int64  `json:"crumbT,omitempty"`
@@ -32,40 +32,39 @@ type RequestData struct {
 	Timestamp      string   `json:"time"`
 }
 
-// Path > Method > Status > Browser > RequestData
-var reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
 var reqMapLock = &sync.Mutex{}
-var reqTrackMap = make(map[string][]string)
 var reqTrackMapLock = &sync.Mutex{}
-var reqTrackTimeMap = make(map[string][]time.Time)
 var reqTrackTimeMapLock = &sync.Mutex{}
-var reqUserMap = make(map[string]bool)
 var reqUserMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
-	reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
-	reqTrackMap = make(map[string][]string)
-	reqTrackTimeMap = make(map[string][]time.Time)
-	reqUserMap = make(map[string]bool)
+	reqMapLock.Lock()
+	client.tMetric.reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
+	reqMapLock.Unlock()
+	reqTrackMapLock.Lock()
+	client.tMetric.reqTrackMap = make(map[string][]string)
+	reqTrackMapLock.Unlock()
+	reqTrackTimeMapLock.Lock()
+	client.tMetric.reqTrackTimeMap = make(map[string][]time.Time)
+	reqTrackTimeMapLock.Unlock()
+	reqUserMapLock.Lock()
+	client.tMetric.reqUserMap = make(map[string]bool)
+	reqUserMapLock.Unlock()
 }
 
 func getHTTPResponseMetric() (map[string]map[string]map[string]map[string][]RequestData, []string) {
 	reqMapLock.Lock()
-	defer reqMapLock.Unlock()
-	reqTrackMapLock.Lock()
-	defer reqTrackMapLock.Unlock()
-	reqTrackTimeMapLock.Lock()
-	defer reqTrackTimeMapLock.Unlock()
 	reqUserMapLock.Lock()
-	defer reqUserMapLock.Unlock()
-	respData := make(map[string]map[string]map[string]map[string][]RequestData, len(reqMap))
-	for k, v := range reqMap {
+	respData := make(map[string]map[string]map[string]map[string][]RequestData, len(client.tMetric.reqMap))
+	for k, v := range client.tMetric.reqMap {
 		respData[k] = v
 	}
 	var userData []string
-	for k := range reqUserMap {
+	for k := range client.tMetric.reqUserMap {
 		userData = append(userData, k)
 	}
+	reqMapLock.Unlock()
+	reqUserMapLock.Unlock()
 	initHTTPMap()
 	return respData, userData
 }
@@ -99,14 +98,14 @@ func LeaveBreadcrumb(r *http.Request, tag string) {
 	// Get tracking id from header
 	id := r.Header.Get("Goni-tracking-id")
 	reqTrackMapLock.Lock()
-	if arr, ok := reqTrackMap[id]; !ok {
+	if arr, ok := client.tMetric.reqTrackMap[id]; !ok {
 		arr = make([]string, 0)
-		reqTrackMap[id] = arr
+		client.tMetric.reqTrackMap[id] = arr
 	}
-	reqTrackMap[id] = append(reqTrackMap[id], tag)
+	client.tMetric.reqTrackMap[id] = append(client.tMetric.reqTrackMap[id], tag)
 	reqTrackMapLock.Unlock()
 	reqTrackTimeMapLock.Lock()
-	reqTrackTimeMap[id] = append(reqTrackTimeMap[id], time.Now())
+	client.tMetric.reqTrackTimeMap[id] = append(client.tMetric.reqTrackTimeMap[id], time.Now())
 	reqTrackTimeMapLock.Unlock()
 }
 
@@ -123,17 +122,17 @@ func (r *Request) addRequestData(panic bool) {
 	reqMapLock.Lock()
 	defer reqMapLock.Unlock()
 	// Map check
-	if mP, ok := reqMap[r.path]; !ok {
+	if mP, ok := client.tMetric.reqMap[r.path]; !ok {
 		mP = make(map[string]map[string]map[string][]RequestData)
-		reqMap[r.path] = mP
+		client.tMetric.reqMap[r.path] = mP
 	}
-	if mM, ok := reqMap[r.path][r.method]; !ok {
+	if mM, ok := client.tMetric.reqMap[r.path][r.method]; !ok {
 		mM = make(map[string]map[string][]RequestData)
-		reqMap[r.path][r.method] = mM
+		client.tMetric.reqMap[r.path][r.method] = mM
 	}
-	if mR, ok := reqMap[r.path][r.method][r.response]; !ok {
+	if mR, ok := client.tMetric.reqMap[r.path][r.method][r.response]; !ok {
 		mR = make(map[string][]RequestData)
-		reqMap[r.path][r.method][r.response] = mR
+		client.tMetric.reqMap[r.path][r.method][r.response] = mR
 	}
 	// UserAgent
 	ua := user_agent.New(r.userAgent)
@@ -141,17 +140,17 @@ func (r *Request) addRequestData(panic bool) {
 	browser := fmt.Sprintf("%s_%s", browserName, browserVersion)
 	// IP
 	reqUserMapLock.Lock()
-	if _, ok := reqUserMap[r.ip]; !ok {
-		reqUserMap[r.ip] = true
+	if _, ok := client.tMetric.reqUserMap[r.ip]; !ok {
+		client.tMetric.reqUserMap[r.ip] = true
 	}
 	reqUserMapLock.Unlock()
 	reqTrackTimeMapLock.Lock()
 	var crumbT []int64
 	var totalD int64
-	crumbLen := len(reqTrackTimeMap[r.id])
+	crumbLen := len(client.tMetric.reqTrackTimeMap[r.id])
 	for i := 0; i < crumbLen; i++ {
 		if i == 0 {
-			d := int64(reqTrackTimeMap[r.id][i].Sub(r.start) / time.Millisecond)
+			d := int64(client.tMetric.reqTrackTimeMap[r.id][i].Sub(r.start) / time.Millisecond)
 			totalD += d
 			crumbT = append(crumbT, d)
 			if i == crumbLen-1 {
@@ -159,24 +158,26 @@ func (r *Request) addRequestData(panic bool) {
 			}
 			continue
 		}
-		d := int64(reqTrackTimeMap[r.id][i].Sub(reqTrackTimeMap[r.id][i-1]) / time.Millisecond)
+		d := int64(client.tMetric.reqTrackTimeMap[r.id][i].Sub(
+			client.tMetric.reqTrackTimeMap[r.id][i-1]) / time.Millisecond)
 		crumbT = append(crumbT, d)
 		totalD += d
 		if i == crumbLen-1 {
 			crumbT = append(crumbT, r.responseTime-totalD)
 		}
 	}
-	delete(reqTrackTimeMap, r.id)
+	delete(client.tMetric.reqTrackTimeMap, r.id)
 	reqTrackTimeMapLock.Unlock()
 	reqTrackMapLock.Lock()
-	reqMap[r.path][r.method][r.response][browser] = append(reqMap[r.path][r.method][r.response][browser], RequestData{
-		Breadcrumb:     reqTrackMap[r.id],
-		BreadcrumbTime: crumbT,
-		Panic:          panic,
-		ResponseTime:   r.responseTime,
-		Timestamp:      getUnixTimestamp(),
-	})
-	delete(reqTrackMap, r.id)
+	client.tMetric.reqMap[r.path][r.method][r.response][browser] =
+		append(client.tMetric.reqMap[r.path][r.method][r.response][browser], RequestData{
+			Breadcrumb:     client.tMetric.reqTrackMap[r.id],
+			BreadcrumbTime: crumbT,
+			Panic:          panic,
+			ResponseTime:   r.responseTime,
+			Timestamp:      getUnixTimestamp(),
+		})
+	delete(client.tMetric.reqTrackMap, r.id)
 	reqTrackMapLock.Unlock()
 }
 

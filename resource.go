@@ -4,7 +4,7 @@ var nonInitialData bool
 
 func getResourceData() map[string]interface{} {
 	m := make(map[string]interface{})
-	cpu, err := getCPUUsage()
+	cpu, err := GetCPUUsage()
 	if err == nil {
 		if !nonInitialData {
 			nonInitialData = true
