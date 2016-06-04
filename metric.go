@@ -55,7 +55,7 @@ func getUnixTimestamp() string {
 func getApplicationMetric() ApplicationMetric {
 	http, user := getHTTPResponseMetric()
 	metric := ApplicationMetric{
-		Error: getErrorMetric(),
+		Error: GetErrorMetric(),
 		HTTP:  http,
 		User:  user,
 	}
