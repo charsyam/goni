@@ -33,7 +33,7 @@ func (c *Client) startSender() {
 		} else {
 			cnt++
 		}
-		data, err := c.getMetric(updateInstanceID)
+		data, err := c.GetMetric(updateInstanceID)
 		if err != nil {
 			log.Println(err)
 			continue

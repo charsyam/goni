@@ -73,7 +73,8 @@ func GetSystemMetric() SystemMetric {
 	return metric
 }
 
-func (c *Client) getMetric(update bool) ([]byte, error) {
+// GetMetric returns marshalled metric.
+func (c *Client) GetMetric(update bool) ([]byte, error) {
 	if update {
 		c.id = getInstanceID()
 	}

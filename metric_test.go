@@ -1,6 +1,7 @@
 package goniplus_test
 
 import (
+	"encoding/json"
 	. "github.com/goniapm/goniplus"
 
 	. "github.com/onsi/ginkgo"
@@ -9,8 +10,11 @@ import (
 )
 
 var _ = Describe("Metric", func() {
+	var (
+		client *Client
+	)
 	BeforeEach(func() {
-		InitSDK("APIKEY", 60)
+		client = InitSDK("APIKEY", 60)
 	})
 	Describe("GetTimestamp", func() {
 		It("should return different string after time passed", func() {
@@ -33,7 +37,7 @@ var _ = Describe("Metric", func() {
 			Expect(len(userMetric)).To(Equal(0))
 		})
 	})
-	Describe("GetSystemCollect", func() {
+	Describe("GetSystemMetric", func() {
 		Context("If initial collect", func() {
 			It("expvar metric should be collected", func() {
 				systemMetric := GetSystemMetric()
@@ -57,6 +61,17 @@ var _ = Describe("Metric", func() {
 				_, ok := systemMetric.Resource["cpu"]
 				Expect(ok).To(Equal(true))
 			})
+		})
+	})
+	Describe("GetMetric", func() {
+		It("should be unmarshalled", func() {
+			metric, err := client.GetMetric(true)
+			if err != nil {
+				Fail("Failed to collect metric")
+			}
+			data := make(map[string]interface{})
+			err = json.Unmarshal(metric, &data)
+			Expect(err).To(BeNil())
 		})
 	})
 })
