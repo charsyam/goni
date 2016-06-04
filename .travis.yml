@@ -1,0 +1,11 @@
+language: go
+os:
+ - linux
+go:
+ - tip
+
+install:
+  - go get
+
+script:
+ - go test -v ./...
