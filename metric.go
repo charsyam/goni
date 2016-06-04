@@ -66,7 +66,7 @@ func getSystemMetric() SystemMetric {
 	metric := SystemMetric{
 		Expvar:   GetExpvar(),
 		Resource: getResourceData(),
-		Runtime:  getRuntimeData(),
+		Runtime:  GetRuntime(),
 	}
 	return metric
 }
