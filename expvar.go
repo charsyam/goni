@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-var excludeExpvarKey = map[string]bool{
-	"BySize":   true,
-	"PauseEnd": true,
-	"PauseNs":  true,
-}
+// ExcludeMemstatKey is a string not to be included
+// in expvar memstats metric map. Key is separated by space.
+var ExcludeMemstatKey = "BySize PauseEnd PauseNs"
 
-func getExpvar() map[string]interface{} {
+// GetExpvar returns expvar metric map.
+// For memstats, key specified in ExcludeMemstatKey will be excluded.
+func GetExpvar() map[string]interface{} {
 	m := make(map[string]interface{})
 	expvar.Do(func(kv expvar.KeyValue) {
 		if kv.Key == "memstats" {
@@ -23,7 +23,7 @@ func getExpvar() map[string]interface{} {
 			}
 			excluded := make(map[string]interface{})
 			for key, value := range data {
-				if _, ok := excludeExpvarKey[key]; !ok {
+				if !strings.Contains(ExcludeMemstatKey, key) {
 					excluded[key] = value
 				}
 			}
