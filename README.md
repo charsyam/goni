@@ -1,4 +1,4 @@
 # goni
-Opensource APM Service for Go
+![beta-badge](https://img.shields.io/badge/release-beta-yellow.svg)
 
-[Wiki](https://github.com/layer123/goni/wiki)
+Opensource APM Service for Go | [Wiki](https://github.com/layer123/goni/wiki)
