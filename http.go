@@ -52,6 +52,7 @@ func initHTTPMap() {
 	reqUserMapLock.Unlock()
 }
 
+// GetHTTPResponseMetric returns http metric map.
 func GetHTTPResponseMetric() (map[string]map[string]map[string]map[string][]RequestData, []string) {
 	reqMapLock.Lock()
 	reqUserMapLock.Lock()
@@ -69,8 +70,8 @@ func GetHTTPResponseMetric() (map[string]map[string]map[string]map[string][]Requ
 	return respData, userData
 }
 
-// Return request id (string) for request tracking
-func createRequestID(m, p string) string {
+// CreateRequestID returns request id (string) for request tracking
+func CreateRequestID(m, p string) string {
 	id := fmt.Sprintf("%v@%s_%s", time.Now().UnixNano(), m, p)
 	return id
 }
@@ -80,7 +81,7 @@ func StartRequestTrack(r *http.Request) *Request {
 	// Create Request for tracking request
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	req := &Request{
-		id:        createRequestID(r.Method, r.URL.String()),
+		id:        CreateRequestID(r.Method, r.URL.String()),
 		ip:        ip,
 		method:    r.Method,
 		path:      r.URL.String(),
