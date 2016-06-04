@@ -11,45 +11,43 @@ var _ = Describe("Error", func() {
 	BeforeEach(func() {
 		InitSDK("APIKEY", 60)
 	})
-	Describe("Error", func() {
-		Context("Create", func() {
-			It("should add error to map", func() {
-				Error("tag", "explanation")
-				errorMetric := GetErrorMetric()
-				Expect(len(errorMetric)).To(Equal(1))
-			})
-			It("should have multiple tags", func() {
-				Error("tagA", "explanation")
-				Error("tagB", "explanation")
-				errorMetric := GetErrorMetric()
-				Expect(len(errorMetric)).To(Equal(2))
-			})
-			It("should have multiple values", func() {
-				tag := "tag"
-				Error(tag, "explanationA")
-				Error(tag, "explanationB")
-				errorMetric := GetErrorMetric()
-				Expect(len(errorMetric)).To(Equal(1))
-				Expect(errorMetric[tag][0]).ToNot(Equal(errorMetric[tag][1]))
-			})
-			It("should have duplicated values", func() {
-				tag := "tag"
-				explanation := "explanation"
-				Error(tag, explanation)
-				Error(tag, explanation)
-				errorMetric := GetErrorMetric()
-				Expect(len(errorMetric)).To(Equal(1))
-				Expect(errorMetric[tag][0]).To(Equal(errorMetric[tag][1]))
-			})
+	Describe("Creating error", func() {
+		It("should added to map", func() {
+			Error("tag", "explanation")
+			errorMetric := GetErrorMetric()
+			Expect(len(errorMetric)).To(Equal(1))
 		})
-		Context("Get", func() {
-			It("should return empty map after get", func() {
-				Error("tag", "explanation")
-				errorMetric := GetErrorMetric()
-				Expect(len(errorMetric)).To(Equal(1))
-				errorMetric = GetErrorMetric()
-				Expect(len(errorMetric)).To(Equal(0))
-			})
+		It("should have multiple tags", func() {
+			Error("tagA", "explanation")
+			Error("tagB", "explanation")
+			errorMetric := GetErrorMetric()
+			Expect(len(errorMetric)).To(Equal(2))
+		})
+		It("should have multiple values", func() {
+			tag := "tag"
+			Error(tag, "explanationA")
+			Error(tag, "explanationB")
+			errorMetric := GetErrorMetric()
+			Expect(len(errorMetric)).To(Equal(1))
+			Expect(errorMetric[tag][0]).ToNot(Equal(errorMetric[tag][1]))
+		})
+		It("should have duplicated values", func() {
+			tag := "tag"
+			explanation := "explanation"
+			Error(tag, explanation)
+			Error(tag, explanation)
+			errorMetric := GetErrorMetric()
+			Expect(len(errorMetric)).To(Equal(1))
+			Expect(errorMetric[tag][0]).To(Equal(errorMetric[tag][1]))
+		})
+	})
+	Describe("Collecting error", func() {
+		It("should return empty map after get", func() {
+			Error("tag", "explanation")
+			errorMetric := GetErrorMetric()
+			Expect(len(errorMetric)).To(Equal(1))
+			errorMetric = GetErrorMetric()
+			Expect(len(errorMetric)).To(Equal(0))
 		})
 	})
 })
