@@ -7,12 +7,16 @@ import (
 	"strings"
 )
 
+// LocalCPUMetric keeps total, idle value for calculating cpu usage
 type localCPUMetric struct {
 	total, idle uint64
 }
 
+// prevCPUMetric saves calculated total, idle value for next calculation
 var prevCPUMetric localCPUMetric
 
+// calcCPUUsage takes fields which parsed from /proc/stat,
+// and returns calculated CPU usage. (float64)
 func calcCPUUsage(fields []string) float64 {
 	var idle, total uint64
 	for i := 1; i < len(fields); i++ {
@@ -28,7 +32,9 @@ func calcCPUUsage(fields []string) float64 {
 	return v
 }
 
-func getCPUUsage() (float64, error) {
+// GetCPUUsage returns CPU usage(float64). If system doesn't support /proc/stat
+// or failed to parse cpu data will return 0.0 with Error.
+func GetCPUUsage() (float64, error) {
 	d, err := ioutil.ReadFile("/proc/stat")
 	if err != nil {
 		return 0.0, errors.New("Cannot read CPU data")
