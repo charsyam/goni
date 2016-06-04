@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// LocalCPUMetric keeps total, idle value for calculating cpu usage
+// LocalCPUMetric keeps total, idle value for calculating cpu usage.
 type localCPUMetric struct {
 	total, idle uint64
 }
