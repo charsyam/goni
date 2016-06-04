@@ -1,10 +1,14 @@
 package goniplus
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestGetExpvar(t *testing.T) {
-	q := getExpvar()
-	if !(len(q) > 0) {
-		t.Fail()
+	fmt.Println("TestGetExpvar")
+	expvar := getExpvar()
+	if !(len(expvar) > 0) {
+		t.Error("getExpvar() should return more than 1 metric")
 	}
 }
