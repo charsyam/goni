@@ -1,31 +1,36 @@
 package goniplus
 
-import "sync"
+import (
+	pb "github.com/goniapm/goniplus-worker/metric"
+	"sync"
+)
 
 var errMapLock = &sync.Mutex{}
 
 // initErrMap initialize error map.
 func initErrMap() {
 	errMapLock.Lock()
-	client.tMetric.errMap = make(map[string][]string)
+	client.tMetric.errMap = make([]*pb.ApplicationMetric_Error, 0)
 	errMapLock.Unlock()
 }
 
 // GetErrorMetric returns error map, and initialize error map.
-func GetErrorMetric() map[string][]string {
+func GetErrorMetric() []*pb.ApplicationMetric_Error {
 	errMapLock.Lock()
-	data := make(map[string][]string)
-	for k, v := range client.tMetric.errMap {
-		data[k] = v
-	}
+	errMetric := make([]*pb.ApplicationMetric_Error, len(client.tMetric.errMap))
+	copy(errMetric, client.tMetric.errMap)
 	errMapLock.Unlock()
 	initErrMap()
-	return data
+	return errMetric
 }
 
 // Error add passed tag, error (explanation) to error map.
 func Error(tag, err string) {
 	errMapLock.Lock()
-	defer errMapLock.Unlock()
-	client.tMetric.errMap[tag] = append(client.tMetric.errMap[tag], err)
+	client.tMetric.errMap = append(client.tMetric.errMap, &pb.ApplicationMetric_Error{
+		Tag:       tag,
+		Log:       err,
+		Timestamp: GetUnixTimestamp(),
+	})
+	errMapLock.Unlock()
 }

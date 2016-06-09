@@ -2,6 +2,7 @@ package goniplus
 
 import (
 	"fmt"
+	pb "github.com/goniapm/goniplus-worker/metric"
 	"github.com/mssola/user_agent"
 	"net"
 	"net/http"
@@ -33,41 +34,63 @@ type RequestData struct {
 }
 
 var reqMapLock = &sync.Mutex{}
+var reqBrowserMapLock = &sync.Mutex{}
 var reqTrackMapLock = &sync.Mutex{}
 var reqTrackTimeMapLock = &sync.Mutex{}
 var reqUserMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
+	// reqMap
 	reqMapLock.Lock()
-	client.tMetric.reqMap = make(map[string]map[string]map[string]map[string][]RequestData)
+	client.tMetric.reqMap = make(map[string]*pb.ApplicationMetric_HTTPDetail)
 	reqMapLock.Unlock()
+	// reqBrowserMap
+	reqBrowserMapLock.Lock()
+	client.tMetric.reqBrowserMap = make(map[string]map[string]uint32)
+	reqBrowserMapLock.Unlock()
+	// reqTrackMap
 	reqTrackMapLock.Lock()
 	client.tMetric.reqTrackMap = make(map[string][]string)
 	reqTrackMapLock.Unlock()
+	// reqTrackTimeMap
 	reqTrackTimeMapLock.Lock()
 	client.tMetric.reqTrackTimeMap = make(map[string][]time.Time)
 	reqTrackTimeMapLock.Unlock()
+	// reqUserMap
 	reqUserMapLock.Lock()
 	client.tMetric.reqUserMap = make(map[string]bool)
 	reqUserMapLock.Unlock()
 }
 
 // GetHTTPResponseMetric returns http metric map.
-func GetHTTPResponseMetric() (map[string]map[string]map[string]map[string][]RequestData, []string) {
+func GetHTTPResponseMetric() (*pb.ApplicationMetric_HTTP, []*pb.ApplicationMetric_User) {
 	reqMapLock.Lock()
 	reqUserMapLock.Lock()
-	respData := make(map[string]map[string]map[string]map[string][]RequestData, len(client.tMetric.reqMap))
-	for k, v := range client.tMetric.reqMap {
-		respData[k] = v
+	reqBrowserMapLock.Lock()
+	var reqMetric []*pb.ApplicationMetric_HTTPDetail
+	for _, v := range client.tMetric.reqMap {
+		browserMap := client.tMetric.reqBrowserMap[v.Path]
+		var browserMetric []*pb.ApplicationMetric_Browser
+		for browser, count := range browserMap {
+			browserMetric = append(browserMetric, &pb.ApplicationMetric_Browser{
+				Browser: browser,
+				Count:   count,
+			})
+		}
+		v.Browser = browserMetric
+		reqMetric = append(reqMetric, v)
 	}
-	var userData []string
-	for k := range client.tMetric.reqUserMap {
-		userData = append(userData, k)
+	reqBrowserMapLock.Unlock()
+	var userMetric []*pb.ApplicationMetric_User
+	for user := range client.tMetric.reqUserMap {
+		userMetric = append(userMetric, &pb.ApplicationMetric_User{
+			Ip: user,
+		})
 	}
-	reqMapLock.Unlock()
 	reqUserMapLock.Unlock()
+	reqMapLock.Unlock()
 	initHTTPMap()
-	return respData, userData
+	return &pb.ApplicationMetric_HTTP{Detail: reqMetric}, userMetric
 }
 
 // CreateRequestID returns request id (string) for request tracking
@@ -120,21 +143,7 @@ func (r *Request) FinishRequestTrack(status int, panic bool) {
 }
 
 func (r *Request) addRequestData(panic bool) {
-	reqMapLock.Lock()
-	defer reqMapLock.Unlock()
-	// Map check
-	if mP, ok := client.tMetric.reqMap[r.path]; !ok {
-		mP = make(map[string]map[string]map[string][]RequestData)
-		client.tMetric.reqMap[r.path] = mP
-	}
-	if mM, ok := client.tMetric.reqMap[r.path][r.method]; !ok {
-		mM = make(map[string]map[string][]RequestData)
-		client.tMetric.reqMap[r.path][r.method] = mM
-	}
-	if mR, ok := client.tMetric.reqMap[r.path][r.method][r.response]; !ok {
-		mR = make(map[string][]RequestData)
-		client.tMetric.reqMap[r.path][r.method][r.response] = mR
-	}
+	reqKey := r.method + " " + r.path
 	// UserAgent
 	ua := user_agent.New(r.userAgent)
 	browserName, browserVersion := ua.Browser()
@@ -170,14 +179,37 @@ func (r *Request) addRequestData(panic bool) {
 	delete(client.tMetric.reqTrackTimeMap, r.id)
 	reqTrackTimeMapLock.Unlock()
 	reqTrackMapLock.Lock()
-	client.tMetric.reqMap[r.path][r.method][r.response][browser] =
-		append(client.tMetric.reqMap[r.path][r.method][r.response][browser], RequestData{
-			Breadcrumb:     client.tMetric.reqTrackMap[r.id],
-			BreadcrumbTime: crumbT,
-			Panic:          panic,
-			ResponseTime:   r.responseTime,
-			Timestamp:      GetUnixTimestamp(),
+	reqMapLock.Lock()
+	if _, ok := client.tMetric.reqMap[reqKey]; !ok {
+		client.tMetric.reqMap[reqKey] = &pb.ApplicationMetric_HTTPDetail{
+			Path:    reqKey,
+			Status:  make([]*pb.ApplicationMetric_HTTPStatus, 0),
+			Browser: make([]*pb.ApplicationMetric_Browser, 0),
+			Breadcrumb: &pb.ApplicationMetric_Breadcrumb{
+				Crumb: make([]*pb.ApplicationMetric_BreadcrumbDetail, 0),
+			},
+		}
+	}
+	detail := client.tMetric.reqMap[reqKey]
+	detail.Status = append(detail.Status, &pb.ApplicationMetric_HTTPStatus{
+		Status:    r.response,
+		Duration:  r.responseTime,
+		Panic:     panic,
+		Timestamp: r.start.Format(time.RFC3339),
+	})
+	detail.Breadcrumb.Crumb =
+		append(detail.Breadcrumb.Crumb, &pb.ApplicationMetric_BreadcrumbDetail{
+			Tag:  client.tMetric.reqTrackMap[r.id],
+			TagT: crumbT,
 		})
+	reqMapLock.Unlock()
+	reqBrowserMapLock.Lock()
+	if _, ok := client.tMetric.reqBrowserMap[reqKey]; !ok {
+		browserMap := make(map[string]uint32)
+		client.tMetric.reqBrowserMap[reqKey] = browserMap
+	}
+	client.tMetric.reqBrowserMap[reqKey][browser]++
+	reqBrowserMapLock.Unlock()
 	delete(client.tMetric.reqTrackMap, r.id)
 	reqTrackMapLock.Unlock()
 }

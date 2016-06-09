@@ -20,7 +20,7 @@ var _ = Describe("Expvar", func() {
 		})
 		It("memstats should not contain key in ExcludeExpvarKey", func() {
 			expvarMetric := GetExpvar()
-			memstats := expvarMetric["memstats"].(string)
+			memstats := expvarMetric["memstats"]
 			decoder := json.NewDecoder(strings.NewReader(memstats))
 			data := make(map[string]interface{})
 			if err := decoder.Decode(&data); err != nil {

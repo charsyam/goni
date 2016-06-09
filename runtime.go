@@ -1,11 +1,14 @@
 package goniplus
 
-import "runtime"
+import (
+	pb "github.com/goniapm/goniplus-worker/metric"
+	"runtime"
+)
 
 // GetRuntime returns runtime metric map.
-func GetRuntime() map[string]interface{} {
-	m := make(map[string]interface{})
-	m["cgo"] = runtime.NumCgoCall()
-	m["goroutine"] = runtime.NumGoroutine()
-	return m
+func GetRuntime() *pb.SystemMetric_Runtime {
+	runtimeMetric := &pb.SystemMetric_Runtime{}
+	runtimeMetric.Cgo = runtime.NumCgoCall()
+	runtimeMetric.Goroutine = int32(runtime.NumGoroutine())
+	return runtimeMetric
 }

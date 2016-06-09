@@ -12,9 +12,13 @@ var _ = Describe("Runtime", func() {
 		InitSDK("APIKEY", 60)
 	})
 	Describe("Collecting metric", func() {
-		It("should return more than 1 metric", func() {
+		It("should contain Cgo", func() {
 			runtimeMetric := GetRuntime()
-			Expect(len(runtimeMetric) > 0).To(Equal(true))
+			Expect(runtimeMetric.Cgo).ToNot(BeNil())
+		})
+		It("should contain Goroutine", func() {
+			runtimeMetric := GetRuntime()
+			Expect(runtimeMetric.Goroutine).ToNot(BeNil())
 		})
 	})
 })

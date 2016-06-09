@@ -12,8 +12,8 @@ var ExcludeMemstatKey = "BySize PauseEnd PauseNs"
 
 // GetExpvar returns expvar metric map.
 // For memstats, key specified in ExcludeMemstatKey will be excluded.
-func GetExpvar() map[string]interface{} {
-	m := make(map[string]interface{})
+func GetExpvar() map[string]string {
+	m := make(map[string]string)
 	expvar.Do(func(kv expvar.KeyValue) {
 		if kv.Key == "memstats" {
 			data := make(map[string]interface{})

@@ -1,13 +1,15 @@
 package goniplus
 
-// GetResource returns resource metric map.
-func GetResource() map[string]interface{} {
-	m := make(map[string]interface{})
+import pb "github.com/goniapm/goniplus-worker/metric"
+
+// GetResource returns resource metric
+func GetResource() *pb.SystemMetric_Resource {
+	resourceMetric := pb.SystemMetric_Resource{}
 	cpu, _ := GetCPUUsage()
 	if !client.tMetric.isResourceInitialCollect {
 		client.tMetric.isResourceInitialCollect = true
 	} else {
-		m["cpu"] = cpu
+		resourceMetric.Cpu = cpu
 	}
-	return m
+	return &resourceMetric
 }

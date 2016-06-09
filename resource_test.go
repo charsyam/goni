@@ -13,20 +13,17 @@ var _ = Describe("Resource", func() {
 	})
 	Describe("GetResource", func() {
 		Context("If initial collect", func() {
-			It("cpu data should not be included", func() {
+			It("cpu data should be 0.0", func() {
 				resourceMetric := GetResource()
-				_, ok := resourceMetric["cpu"]
-				Expect(ok).To(Equal(false))
+				Expect(resourceMetric.Cpu).To(Equal(0.0))
 			})
 		})
 		Context("If non-initial collect", func() {
 			It("cpu data should be included", func() {
 				resourceMetric := GetResource()
-				_, ok := resourceMetric["cpu"]
-				Expect(ok).To(Equal(false))
+				Expect(resourceMetric.Cpu).To(Equal(0.0))
 				resourceMetric = GetResource()
-				_, ok = resourceMetric["cpu"]
-				Expect(ok).To(Equal(true))
+				Expect(resourceMetric.Cpu >= 0).To(Equal(true))
 			})
 		})
 	})

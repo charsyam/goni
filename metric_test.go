@@ -1,8 +1,8 @@
-package goniplus_test
+package goniplus
 
 import (
-	"encoding/json"
-	. "github.com/goniapm/goniplus"
+	"github.com/golang/protobuf/proto"
+	pb "github.com/goniapm/goniplus-worker/metric"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,7 +33,7 @@ var _ = Describe("Metric", func() {
 			GetApplicationMetric()
 			Expect(len(GetErrorMetric())).To(Equal(0))
 			httpMetric, userMetric := GetHTTPResponseMetric()
-			Expect(len(httpMetric)).To(Equal(0))
+			Expect(len(httpMetric.Detail)).To(Equal(0))
 			Expect(len(userMetric)).To(Equal(0))
 		})
 	})
@@ -43,14 +43,9 @@ var _ = Describe("Metric", func() {
 				systemMetric := GetSystemMetric()
 				Expect(len(systemMetric.Expvar) > 0).To(Equal(true))
 			})
-			It("resource/cpu metric should not be collected", func() {
+			It("resource/cpu metric should be 0.0", func() {
 				systemMetric := GetSystemMetric()
-				_, ok := systemMetric.Resource["cpu"]
-				Expect(ok).To(Equal(false))
-			})
-			It("runtime metric should be collected", func() {
-				systemMetric := GetSystemMetric()
-				Expect(len(systemMetric.Runtime) > 0).To(Equal(true))
+				Expect(systemMetric.Resource.Cpu).To(Equal(0.0))
 			})
 		})
 		Context("If non-initial collect", func() {
@@ -58,19 +53,18 @@ var _ = Describe("Metric", func() {
 				systemMetric := GetSystemMetric()
 				time.Sleep(time.Second)
 				systemMetric = GetSystemMetric()
-				_, ok := systemMetric.Resource["cpu"]
-				Expect(ok).To(Equal(true))
+				Expect(systemMetric.Resource.Cpu >= 0).To(Equal(true))
 			})
 		})
 	})
 	Describe("GetMetric", func() {
 		It("should be unmarshalled", func() {
-			metric, err := client.GetMetric(true)
+			metric, err := client.getMetric(true)
 			if err != nil {
 				Fail("Failed to collect metric")
 			}
-			data := make(map[string]interface{})
-			err = json.Unmarshal(metric, &data)
+			marshalled := &pb.Metric{}
+			err = proto.Unmarshal(metric, marshalled)
 			Expect(err).To(BeNil())
 		})
 	})

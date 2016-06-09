@@ -1,45 +1,23 @@
 package goniplus
 
 import (
-	"encoding/json"
+	"github.com/golang/protobuf/proto"
+	pb "github.com/goniapm/goniplus-worker/metric"
 	"strconv"
 	"time"
 )
 
 // tempMetric contains temporary data for calculating / collecting data.
 type tempMetric struct {
-	errMap                   map[string][]string
+	errMap                   []*pb.ApplicationMetric_Error
 	isResourceInitialCollect bool
 	// prevCPUMetric saves calculated total, idle value for next calculation
-	prevCPUMetric localCPUMetric
-	// Path > Method > Status > Browser > RequestData
-	reqMap          map[string]map[string]map[string]map[string][]RequestData
+	prevCPUMetric   localCPUMetric
+	reqMap          map[string]*pb.ApplicationMetric_HTTPDetail
+	reqBrowserMap   map[string]map[string]uint32
 	reqTrackMap     map[string][]string
 	reqTrackTimeMap map[string][]time.Time
 	reqUserMap      map[string]bool
-}
-
-// ApplicationMetric contains error / http / user data.
-type ApplicationMetric struct {
-	Error map[string][]string                                       `json:"err"`
-	HTTP  map[string]map[string]map[string]map[string][]RequestData `json:"http"`
-	User  []string                                                  `json:"user"`
-}
-
-// SystemMetric contains expvar / resource / runtime data.
-type SystemMetric struct {
-	Expvar   map[string]interface{} `json:"expvar"`
-	Resource map[string]interface{} `json:"resource"`
-	Runtime  map[string]interface{} `json:"runtime"`
-}
-
-// Metric contains SystemMetric and timestamp.
-type Metric struct {
-	APIKey      string            `json:"apikey"`
-	Application ApplicationMetric `json:"app"`
-	Instance    string            `json:"instance"`
-	System      SystemMetric      `json:"sys"`
-	Timestamp   string            `json:"time"`
 }
 
 // GetTimestamp returns RFC3339 Timestamp in string.
@@ -53,38 +31,38 @@ func GetUnixTimestamp() string {
 }
 
 // GetApplicationMetric returns ApplicationMetric.
-func GetApplicationMetric() ApplicationMetric {
+func GetApplicationMetric() *pb.ApplicationMetric {
 	http, user := GetHTTPResponseMetric()
-	metric := ApplicationMetric{
+	appMetric := &pb.ApplicationMetric{
 		Error: GetErrorMetric(),
-		HTTP:  http,
+		Http:  http,
 		User:  user,
 	}
-	return metric
+	return appMetric
 }
 
 // GetSystemMetric returns SystemMetric.
-func GetSystemMetric() SystemMetric {
-	metric := SystemMetric{
+func GetSystemMetric() *pb.SystemMetric {
+	systemMetric := &pb.SystemMetric{
 		Expvar:   GetExpvar(),
 		Resource: GetResource(),
 		Runtime:  GetRuntime(),
 	}
-	return metric
+	return systemMetric
 }
 
 // GetMetric returns marshalled metric.
-func (c *Client) GetMetric(update bool) ([]byte, error) {
+func (c *Client) getMetric(update bool) ([]byte, error) {
 	if update {
 		c.id = getInstanceID()
 	}
-	metric := Metric{
-		APIKey:      c.apikey,
-		Application: GetApplicationMetric(),
+	metric := &pb.Metric{
+		Apikey:      c.apikey,
 		Instance:    c.id,
+		Timestamp:   GetUnixTimestamp(),
+		Application: GetApplicationMetric(),
 		System:      GetSystemMetric(),
-		Timestamp:   GetTimestamp(),
 	}
-	data, err := json.Marshal(metric)
+	data, err := proto.Marshal(metric)
 	return data, err
 }

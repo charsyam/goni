@@ -44,5 +44,5 @@ func GetCPUUsage() (float64, error) {
 		usage := calcCPUUsage(fields)
 		return usage, nil
 	}
-	return 0.0, errors.New("Cannot parse CPU data")
+	return float64(0), errors.New("Cannot parse CPU data")
 }

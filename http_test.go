@@ -47,19 +47,15 @@ var _ = Describe("Http", func() {
 			time.Sleep(time.Second)
 			reqTrack.FinishRequestTrack(200, false)
 			httpMetric, _ := GetHTTPResponseMetric()
-			for k := range httpMetric["PATH"]["GET"]["200"] {
-				v := httpMetric["PATH"]["GET"]["200"][k][0]
-				Expect(len(v.Breadcrumb) > 0).To(Equal(true))
-				Expect(len(v.BreadcrumbTime) - len(v.Breadcrumb)).To(Equal(1))
-			}
-
+			Expect(len(httpMetric.Detail[0].Breadcrumb.Crumb[0].Tag) > 0).To(Equal(true))
+			Expect(len(httpMetric.Detail[0].Breadcrumb.Crumb[0].TagT) > 0).To(Equal(true))
 		})
 		It("FinishRequestTrack should add data to map", func() {
 			reqTrack := StartRequestTrack(req)
 			time.Sleep(time.Second)
 			reqTrack.FinishRequestTrack(200, false)
 			httpMetric, _ := GetHTTPResponseMetric()
-			Expect(len(httpMetric) > 0).To(Equal(true))
+			Expect(len(httpMetric.Detail) > 0).To(Equal(true))
 		})
 	})
 })
