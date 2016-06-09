@@ -17,7 +17,7 @@ type Client struct {
 
 // Global GoniPlus client
 var client *Client
-var metricURL = "goniplus.layer123.io:9900"
+var metricURL = "goni.goniapm.io:9900"
 
 // getIP() returns system's IP address in string
 func getIP() string {
@@ -57,4 +57,9 @@ func InitSDK(apikey string, interval int) *Client {
 	initHTTPMap()
 	go client.startSender()
 	return client
+}
+
+// SetMetricURL sets metric url to provided url
+func (c *Client) SetMetricURL(url string) {
+	metricURL = url
 }
