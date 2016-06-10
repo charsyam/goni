@@ -1,3 +1,5 @@
+// Reference : http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
+
 package main
 
 import pb "github.com/goniapm/goniplus-worker/metric"
