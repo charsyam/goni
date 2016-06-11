@@ -73,15 +73,15 @@ func createMessageBody(instance, timestamp string, panicMap, slowMap map[string]
 }
 
 func sendSlackNotification(metric *pb.Metric) {
-	httpMetric := metric.Application.Http.Detail
+	transactionMetric := metric.Application.Transaction.Detail
 	panicMap := make(map[string]int)
 	slowMap := make(map[string]int)
-	for _, detail := range httpMetric {
-		for _, status := range detail.Status {
-			if status.Panic {
+	for _, detail := range transactionMetric {
+		for _, transaction := range detail.Data {
+			if transaction.Status.Panic {
 				panicMap[detail.Path]++
 			}
-			if status.Duration > 3000 {
+			if transaction.Status.Duration > 3000 {
 				slowMap[detail.Path]++
 			}
 		}
