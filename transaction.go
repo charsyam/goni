@@ -33,21 +33,16 @@ type RequestData struct {
 	Timestamp      string   `json:"time"`
 }
 
-var reqMapLock = &sync.Mutex{}
-var reqBrowserMapLock = &sync.Mutex{}
+var transactionMapLock = &sync.Mutex{}
 var reqTrackMapLock = &sync.Mutex{}
 var reqTrackTimeMapLock = &sync.Mutex{}
 var reqUserMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
 	// reqMap
-	reqMapLock.Lock()
-	client.tMetric.reqMap = make(map[string]*pb.ApplicationMetric_HTTPDetail)
-	reqMapLock.Unlock()
-	// reqBrowserMap
-	reqBrowserMapLock.Lock()
-	client.tMetric.reqBrowserMap = make(map[string]map[string]uint32)
-	reqBrowserMapLock.Unlock()
+	transactionMapLock.Lock()
+	client.tMetric.transactionMap = make(map[string]*pb.ApplicationMetric_TransactionDetail)
+	transactionMapLock.Unlock()
 	// reqTrackMap
 	reqTrackMapLock.Lock()
 	client.tMetric.reqTrackMap = make(map[string][]string)
@@ -62,25 +57,14 @@ func initHTTPMap() {
 	reqUserMapLock.Unlock()
 }
 
-// GetHTTPResponseMetric returns http metric map.
-func GetHTTPResponseMetric() (*pb.ApplicationMetric_HTTP, []*pb.ApplicationMetric_User) {
-	reqMapLock.Lock()
+// GetTransactionMetric returns http metric map.
+func GetTransactionMetric() (*pb.ApplicationMetric_Transaction, []*pb.ApplicationMetric_User) {
+	transactionMapLock.Lock()
 	reqUserMapLock.Lock()
-	reqBrowserMapLock.Lock()
-	var reqMetric []*pb.ApplicationMetric_HTTPDetail
-	for _, v := range client.tMetric.reqMap {
-		browserMap := client.tMetric.reqBrowserMap[v.Path]
-		var browserMetric []*pb.ApplicationMetric_Browser
-		for browser, count := range browserMap {
-			browserMetric = append(browserMetric, &pb.ApplicationMetric_Browser{
-				Browser: browser,
-				Count:   count,
-			})
-		}
-		v.Browser = browserMetric
-		reqMetric = append(reqMetric, v)
+	var transactionMetric []*pb.ApplicationMetric_TransactionDetail
+	for _, v := range client.tMetric.transactionMap {
+		transactionMetric = append(transactionMetric, v)
 	}
-	reqBrowserMapLock.Unlock()
 	var userMetric []*pb.ApplicationMetric_User
 	for user := range client.tMetric.reqUserMap {
 		userMetric = append(userMetric, &pb.ApplicationMetric_User{
@@ -88,9 +72,9 @@ func GetHTTPResponseMetric() (*pb.ApplicationMetric_HTTP, []*pb.ApplicationMetri
 		})
 	}
 	reqUserMapLock.Unlock()
-	reqMapLock.Unlock()
+	transactionMapLock.Unlock()
 	initHTTPMap()
-	return &pb.ApplicationMetric_HTTP{Detail: reqMetric}, userMetric
+	return &pb.ApplicationMetric_Transaction{Detail: transactionMetric}, userMetric
 }
 
 // CreateRequestID returns request id (string) for request tracking
@@ -179,37 +163,28 @@ func (r *Request) addRequestData(panic bool) {
 	delete(client.tMetric.reqTrackTimeMap, r.id)
 	reqTrackTimeMapLock.Unlock()
 	reqTrackMapLock.Lock()
-	reqMapLock.Lock()
-	if _, ok := client.tMetric.reqMap[reqKey]; !ok {
-		client.tMetric.reqMap[reqKey] = &pb.ApplicationMetric_HTTPDetail{
-			Path:    reqKey,
-			Status:  make([]*pb.ApplicationMetric_HTTPStatus, 0),
-			Browser: make([]*pb.ApplicationMetric_Browser, 0),
-			Breadcrumb: &pb.ApplicationMetric_Breadcrumb{
-				Crumb: make([]*pb.ApplicationMetric_BreadcrumbDetail, 0),
-			},
+	transactionMapLock.Lock()
+	if _, ok := client.tMetric.transactionMap[reqKey]; !ok {
+		client.tMetric.transactionMap[reqKey] = &pb.ApplicationMetric_TransactionDetail{
+			Path: reqKey,
+			Data: make([]*pb.ApplicationMetric_TransactionData, 0),
 		}
 	}
-	detail := client.tMetric.reqMap[reqKey]
-	detail.Status = append(detail.Status, &pb.ApplicationMetric_HTTPStatus{
-		Status:    r.response,
-		Duration:  r.responseTime,
-		Panic:     panic,
-		Timestamp: strconv.FormatInt(r.start.Unix(), 10),
-	})
-	detail.Breadcrumb.Crumb =
-		append(detail.Breadcrumb.Crumb, &pb.ApplicationMetric_BreadcrumbDetail{
+	detail := client.tMetric.transactionMap[reqKey]
+	detail.Data = append(detail.Data, &pb.ApplicationMetric_TransactionData{
+		Status: &pb.ApplicationMetric_TransactionStatus{
+			Status:    r.response,
+			Duration:  r.responseTime,
+			Panic:     panic,
+			Timestamp: strconv.FormatInt(r.start.Unix(), 10),
+		},
+		Browser: browser,
+		Breadcrumb: &pb.ApplicationMetric_Breadcrumb{
 			Tag:  client.tMetric.reqTrackMap[r.id],
 			TagT: crumbT,
-		})
-	reqMapLock.Unlock()
-	reqBrowserMapLock.Lock()
-	if _, ok := client.tMetric.reqBrowserMap[reqKey]; !ok {
-		browserMap := make(map[string]uint32)
-		client.tMetric.reqBrowserMap[reqKey] = browserMap
-	}
-	client.tMetric.reqBrowserMap[reqKey][browser]++
-	reqBrowserMapLock.Unlock()
+		},
+	})
+	transactionMapLock.Unlock()
 	delete(client.tMetric.reqTrackMap, r.id)
 	reqTrackMapLock.Unlock()
 }

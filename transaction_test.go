@@ -26,8 +26,8 @@ var _ = Describe("Http", func() {
 		}
 		req.Header.Set("User-Agent", "Chrome 41.0.2228.0")
 	})
-	Describe("Create Request ID", func() {
-		It("should return different request id", func() {
+	Describe("Create Transaction ID", func() {
+		It("should return different Transaction id", func() {
 			method := "GET"
 			path := "PATH"
 			id1 := CreateRequestID(method, path)
@@ -35,7 +35,7 @@ var _ = Describe("Http", func() {
 			Expect(id1).NotTo(Equal(id2))
 		})
 	})
-	Describe("Request Track (http)", func() {
+	Describe("Transaction Track (http)", func() {
 		It("http header should have a tracking id", func() {
 			StartRequestTrack(req)
 			Expect(len(req.Header.Get("Goni-tracking-id")) > 0).To(Equal(true))
@@ -46,16 +46,16 @@ var _ = Describe("Http", func() {
 			LeaveBreadcrumb(req, "tag")
 			time.Sleep(time.Second)
 			reqTrack.FinishRequestTrack(200, false)
-			httpMetric, _ := GetHTTPResponseMetric()
-			Expect(len(httpMetric.Detail[0].Breadcrumb.Crumb[0].Tag) > 0).To(Equal(true))
-			Expect(len(httpMetric.Detail[0].Breadcrumb.Crumb[0].TagT) > 0).To(Equal(true))
+			transactionMetric, _ := GetTransactionMetric()
+			Expect(len(transactionMetric.Detail[0].Data[0].Breadcrumb.Tag) > 0).To(Equal(true))
+			Expect(len(transactionMetric.Detail[0].Data[0].Breadcrumb.TagT) > 0).To(Equal(true))
 		})
 		It("FinishRequestTrack should add data to map", func() {
 			reqTrack := StartRequestTrack(req)
 			time.Sleep(time.Second)
 			reqTrack.FinishRequestTrack(200, false)
-			httpMetric, _ := GetHTTPResponseMetric()
-			Expect(len(httpMetric.Detail) > 0).To(Equal(true))
+			transactionMetric, _ := GetTransactionMetric()
+			Expect(len(transactionMetric.Detail) > 0).To(Equal(true))
 		})
 	})
 })
