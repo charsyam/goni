@@ -20,8 +20,8 @@ Also, You **must** set ENV variables listed below.
 - `GONI_MYSQL_PASS`
   - e.g. `password`
 - `GONI_INFLUX_HOST`
-  - e.g. `http://127.0.0.1`
-  - **Protocol must be included**
+  - e.g. `http://127.0.0.1:8086`
+  - **Protocol and Port must be included**
 - `GONI_INFLUX_USER`
   - e.g. `username`
 - `GONI_INFLUX_PASS`
