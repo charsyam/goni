@@ -14,6 +14,8 @@ Goni는 Go언어를 위한 오픈소스 APM(Application Performance Management) 
 
 - **Notification** : Transaction 처리 도중 Panic이 발생하거나, Slow Transaction(응답시간 3초 이상)이 발생한 경우 Slack으로 Notification을 보내줍니다.
 
+![overview-notification](./resource/overview-notification.png)
+
 ## Architecture
 * Collector - Worker 사이의 통신 포맷으로 [protobuf](https://github.com/google/protobuf)를 사용합니다.
 * Metric Data는 `timeseries data` 저장에 최적화된 [InfluxDB](https://influxdata.com/)에 저장합니다.
