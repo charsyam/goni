@@ -2,15 +2,8 @@ syntax = "proto3";
 
 message ApplicationMetric {
   message Breadcrumb {
-    repeated BreadcrumbDetail crumb = 1;
-  }
-  message BreadcrumbDetail {
     repeated string tag = 1;
     repeated int64 tagT = 2;
-  }
-  message Browser {
-    string browser = 1;
-    uint32 count = 2;
   }
   message Error {
     string tag = 1;
@@ -21,10 +14,13 @@ message ApplicationMetric {
     repeated HTTPDetail detail = 1;
   }
   message HTTPDetail {
-    string path = 1; // METHOD_NAME + " " + PATH
-    repeated HTTPStatus status = 2;
-    repeated Browser browser = 3;
-    Breadcrumb breadcrumb = 4;
+    string path = 1;
+    repeated HTTPRequest request = 2;
+  }
+  message HTTPRequest {
+    HTTPStatus status = 1;
+    string browser = 2;
+    Breadcrumb breadcrumb = 3;
   }
   message HTTPStatus {
     string status = 1;
