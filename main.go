@@ -5,11 +5,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/proto"
 	pb "github.com/goniapm/goniplus-worker/metric"
+	influxlib "github.com/influxdata/influxdb/client/v2"
 	"io/ioutil"
 	"log"
 	"net"
 )
 
+var influx influxlib.Client
 var mySQL *sql.DB
 
 func handleData(conn net.Conn, dbQueue, slackQueue chan *pb.Metric) {
@@ -34,6 +36,12 @@ func handleData(conn net.Conn, dbQueue, slackQueue chan *pb.Metric) {
 }
 
 func main() {
+	influxConn, err := getInflux()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	influx = influxConn
 	mySQLConn, err := getMySQL()
 	if err != nil {
 		log.Fatalln(err)
