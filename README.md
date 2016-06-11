@@ -6,17 +6,27 @@
 Goni는 Go언어를 위한 오픈소스 APM(Application Performance Management) 툴입니다.
 
 ## Overview
-- **Dashboard** : 시간대별 Instance의 CPU (*Linux만 지원*) / Heap (*추후 지원 예정*) 사용량 히트맵을 클릭하면, 그 시간대의 User, Top 5 Instance, Top 5 Transaction, Transaction Detail을 보여줍니다.
+- **Dashboard** : 시간대별 Instance의 CPU *(Linux만 지원)* / Heap *(추후 지원 예정)* 사용량 히트맵을 클릭하면, 그 시간대의 User, Top 5 Instance, Top 5 Transaction, Transaction Detail을 보여줍니다.
 
 - **Transaction Trace** : Go언어에서 `CallStack`을 가져오는데 한계가 있어, `CallStack`을 대체할 Transaction Trace 기능을 제공합니다. 이 기능을 통해 요청이 들어왔을 때 부터, 요청이 완료될 때 까지의 상태를 `Sankey Chart`로 보여줍니다.
 
 - **Metric View** : Expvar / Runtime Metric 뿐만 아니라, 요청에 대한 다양한 Metric을 제공합니다.
 
+- **Notification** : Transaction 처리 도중 Panic이 발생하거나, Slow Transaction(응답시간 3초 이상)이 발생한 경우 Slack으로 Notification을 보내줍니다.
+
 ## Architecture
-* Client - Collector간의 통신 포맷으로 [protobuf](https://github.com/google/protobuf)를 사용합니다.
+* Collector - Worker 사이의 통신 포맷으로 [protobuf](https://github.com/google/protobuf)를 사용합니다.
 * Metric Data는 `timeseries data` 저장에 최적화된 [InfluxDB](https://influxdata.com/)에 저장합니다.
 * 일반적인 정보(회원 데이터 / 프로젝트 설정)는 [MySQL](https://www.mysql.com/)에 저장합니다.
 * Frontend는 [React](https://facebook.github.io/react/)를 사용합니다.
+
+
+Goni는 다음 프로젝트들로 이루어져있습니다.
+* [**goniplus**](https://github.com/goniapm/goniplus) : Application 내부에서 Metric을 수집하고, Worker에게 전송하는 Metric Collector입니다.
+* [**goni-sms**](https://github.com/goniapm/goni-sms) *(개발 중단)* : Application 외부에서 Metric을 수집하고, Worker에게 전송하는 Metric Collector입니다.
+* [**goni-dashboard**](https://github.com/goniapm/goni-dashboard) : goni-sms / goniplus에서 수집한 Metric을 보여주는 Dashboard입니다.
+* [**goniplus-worker**](https://github.com/goniapm/goniplus-worker) : goniplus가 전송하는 Metric을 받아서 처리하는 Worker입니다.
+* [**goni-mobile**](https://github.com/goniapm/goni-mobile) : goni-sms / goniplus에서 수집한 Metric을 모바일에서 간단하게 확인할 수 있는 Application입니다.
 
 ## Quickstart
 [Wiki](https://github.com/goniapm/goni/wiki)를 참고해주세요 :D
