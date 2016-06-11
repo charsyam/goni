@@ -20,11 +20,6 @@ type tempMetric struct {
 	reqUserMap      map[string]bool
 }
 
-// GetTimestamp returns RFC3339 Timestamp in string.
-func GetTimestamp() string {
-	return time.Now().Format(time.RFC3339)
-}
-
 // GetUnixTimestamp returns UnixTimestamp in string.
 func GetUnixTimestamp() string {
 	return strconv.FormatInt(time.Now().Unix(), 10)

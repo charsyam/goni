@@ -195,7 +195,7 @@ func (r *Request) addRequestData(panic bool) {
 		Status:    r.response,
 		Duration:  r.responseTime,
 		Panic:     panic,
-		Timestamp: r.start.Format(time.RFC3339),
+		Timestamp: strconv.FormatInt(r.start.Unix(), 10),
 	})
 	detail.Breadcrumb.Crumb =
 		append(detail.Breadcrumb.Crumb, &pb.ApplicationMetric_BreadcrumbDetail{
