@@ -1,6 +1,8 @@
 # goniplus-worker
 Data handler / worker for Goni+
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/goniapm/goniplus-worker)](https://goreportcard.com/report/github.com/goniapm/goniplus-worker)
+
 ## Before you start
 goniplus-worker require databases with settings. For more information, please visit [Wiki](https://github.com/goniapm/goni/wiki)
 
