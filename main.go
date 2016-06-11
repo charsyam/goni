@@ -1,12 +1,16 @@
 package main
 
 import (
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/proto"
 	pb "github.com/goniapm/goniplus-worker/metric"
 	"io/ioutil"
 	"log"
 	"net"
 )
+
+var mySQL *sql.DB
 
 func handleData(conn net.Conn, dbQueue, slackQueue chan *pb.Metric) {
 	defer conn.Close()
@@ -21,7 +25,7 @@ func handleData(conn net.Conn, dbQueue, slackQueue chan *pb.Metric) {
 	}
 	metric := &pb.Metric{}
 	if err = proto.Unmarshal(b, metric); err != nil {
-		log.Fatalln("Failed to parse metric:", err)
+		log.Println("Failed to parse metric:", err)
 		return
 	}
 	data := metric
@@ -30,6 +34,13 @@ func handleData(conn net.Conn, dbQueue, slackQueue chan *pb.Metric) {
 }
 
 func main() {
+	mySQLConn, err := getMySQL()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	mySQL = mySQLConn
+	defer mySQL.Close()
 	maxWorkers := 2
 	queueSize := 256
 	dbQueue := make(chan *pb.Metric, queueSize)
