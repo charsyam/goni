@@ -50,6 +50,10 @@ Goni는 다음 프로젝트들로 이루어져있습니다.
 ## Contribution
 Goni를 개선해주세요! Contribution은 언제나 환영합니다 :D
 
+## Acknowledgement
+
+이 프로젝트는 [소프트웨어 마에스트로](http://swmaestro.kr)과정 중 [Whatap](https://whatap.io)의 손영수 멘토님과의 멘토링을 통해 개발된 프로젝트입니다.
+
 ## License
 ```
 The MIT License (MIT)
