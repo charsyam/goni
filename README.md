@@ -41,6 +41,9 @@ Goni는 다음 프로젝트들로 이루어져있습니다.
 ## Quickstart
 [Wiki](https://github.com/goniapm/goni/wiki)를 참고해주세요 :D
 
+### Server Install
+[Docker Image](https://github.com/goniapm/goni-docker-solo)로 빠르게 사용하거나, [직접 설치](https://github.com/goniapm/goni/wiki)하실 수 있습니다.
+
 ## Issue
 사용시 문제점 / 궁금하신 점이 있으시면 [여기](https://github.com/goniapm/goni/issues)에 이슈를 남겨주세요.
 
