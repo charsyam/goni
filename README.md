@@ -11,10 +11,10 @@ import "github.com/goniapm/goniplus"
 
 ### Get API Key
 * If you use [hosted service](https://dashboard.goniapm.io),
-    * Signup and create new project.
+   * Signup and create new project.
 * If you use self hosted(private) service,
-    * Go to hosted website dashboard, signup, and create new project.
-    * For more information, please check [Goni wiki](https://github.com/goniapm/goni/wiki/Install-Guide).
+   * Go to hosted website dashboard, signup, and create new project.
+   * For more information, please check [Goni wiki](https://github.com/goniapm/goni/wiki/Install-Guide).
 
 ## Metrics
 
@@ -26,17 +26,14 @@ Goni+ can collect
 
 Some metrics can be collected manually.
 * Breadcrumb (HTTP request track)
+  * [Guide](https://github.com/goniapm/goni/wiki/goniplus#transaction-tracking) 
 * Error
 
 ## Middleware Support
 Goni is specialized to web application monitoring, so Goni+ supports multiple web frameworks. Supported web frameworks are listed below.
 
-* [net/http](https://github.com/goniapm/goni/wiki/goniplus-nethttp)
-* [Gin](https://github.com/goniapm/goniplus-gin)
-
-## Example
-* [net/http](https://github.com/goniapm/goni/wiki/goniplus-nethttp)
-* [Gin](https://github.com/goniapm/goniplus-gin)
+* [net/http](https://github.com/goniapm/goni/wiki/Quickstart_nethttp)
+* [Gin](https://github.com/goniapm/goni/wiki/Quickstart_gin)
 
 ## Links
 * [Goni](https://github.com/goniapm/goni)
