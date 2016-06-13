@@ -25,7 +25,8 @@ Goni는 Go언어를 위한 오픈소스 APM(Application Performance Management) 
 ![overview-notification](./resource/overview-notification.png)
 
 ## Architecture
-* Collector - Worker 사이의 통신 포맷으로 [protobuf](https://github.com/google/protobuf)를 사용합니다.
+![overview-architecture](./resource/overview-architecture.png)
+* Collector(goniplus) - Worker 사이의 통신 포맷으로 [protobuf](https://github.com/google/protobuf)를 사용합니다.
 * Metric Data는 `timeseries data` 저장에 최적화된 [InfluxDB](https://influxdata.com/)에 저장합니다.
 * 일반적인 정보(회원 데이터 / 프로젝트 설정)는 [MySQL](https://www.mysql.com/)에 저장합니다.
 * Frontend는 [React](https://facebook.github.io/react/)를 사용합니다.
@@ -38,11 +39,7 @@ Goni는 다음 프로젝트들로 이루어져있습니다.
 * [**goniplus-worker**](https://github.com/goniapm/goniplus-worker) : goniplus가 전송하는 Metric을 받아서 처리하는 Worker입니다.
 * **goni-mobile** *(추후 공개 예정)* : goni-sms / goniplus에서 수집한 Metric을 모바일에서 간단하게 확인할 수 있는 Application입니다.
 
-## Quickstart
-[Wiki](https://github.com/goniapm/goni/wiki)를 참고해주세요 :D
-
-### Server Install
-[Docker Image](https://github.com/goniapm/goni-docker-solo)로 빠르게 사용하거나, [직접 설치](https://github.com/goniapm/goni/wiki)하실 수 있습니다.
+## [Quickstart](https://github.com/goniapm/goni/wiki/Quickstart)
 
 ## Issue
 사용시 문제점 / 궁금하신 점이 있으시면 [여기](https://github.com/goniapm/goni/issues)에 이슈를 남겨주세요.
@@ -52,7 +49,8 @@ Goni를 개선해주세요! Contribution은 언제나 환영합니다 :D
 
 ## Acknowledgement
 
-이 프로젝트는 [소프트웨어 마에스트로](http://swmaestro.kr)과정 중 [Whatap](https://whatap.io)의 손영수 멘토님과의 멘토링을 통해 개발된 프로젝트입니다.
+* 이 프로젝트는 [소프트웨어 마에스트로](http://swmaestro.kr)과정 중 [Whatap](https://whatap.io)의 손영수 멘토님과의 멘토링을 통해 개발된 프로젝트입니다.
+* 폰트는 [Spoqa Han Sans](http://spoqa.github.io/spoqa-han-sans/)를 사용하고, Color Scheme은 [Spoqa Design Guideline](http://bi.spoqa.com/color.html)을 참고했습니다.
 
 ## License
 ```
