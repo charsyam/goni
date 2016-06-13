@@ -130,6 +130,11 @@ func addUser(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints) {
 }
 
 func insertMetric(data *pb.Metric) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("recovered at insertMetric: ", r)
+		}
+	}()
 	bp, err := influxlib.NewBatchPoints(influxlib.BatchPointsConfig{
 		Database:  "goniplus",
 		Precision: "s",

@@ -73,6 +73,11 @@ func createMessageBody(instance, timestamp string, panicMap, slowMap map[string]
 }
 
 func sendSlackNotification(metric *pb.Metric) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("recovered at sendSlackNotification: ", r)
+		}
+	}()
 	transactionMetric := metric.Application.Transaction.Detail
 	panicMap := make(map[string]int)
 	slowMap := make(map[string]int)
