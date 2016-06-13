@@ -25,14 +25,18 @@ func handleData(conn net.Conn, dbQueue, slackQueue chan *pb.Metric) {
 	if err != nil {
 		return
 	}
-	metric := &pb.Metric{}
-	if err = proto.Unmarshal(b, metric); err != nil {
+	db := &pb.Metric{}
+	if err = proto.Unmarshal(b, db); err != nil {
 		log.Println("Failed to parse metric:", err)
 		return
 	}
-	data := metric
-	dbQueue <- data
-	slackQueue <- data
+	slack := &pb.Metric{}
+	if err = proto.Unmarshal(b, slack); err != nil {
+		log.Println("Failed to parse metric:", err)
+		return
+	}
+	dbQueue <- db
+	slackQueue <- slack
 }
 
 func main() {
