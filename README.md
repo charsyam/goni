@@ -7,6 +7,15 @@ Document : [Korean](https://github.com/goniapm/goni/blob/master/README_ko.md)
 
 Goni is an Open Source APM(Application Performance Management) tool for Go
 
+## Source code
+
+Goni is composed with following projects. You can check source code in each repository.
+* [**goniplus**](https://github.com/goniapm/goniplus) : Application metric collector
+* [**goni-sms**](https://github.com/goniapm/goni-sms) *(development suspended)* : Server instance metric collector
+* [**goni-dashboard**](https://github.com/goniapm/goni-dashboard) : Visualize metric from goni-sms / goniplus
+* [**goniplus-worker**](https://github.com/goniapm/goniplus-worker) : Metric handler / processor for goniplus
+* **goni-mobile** *(Coming soon)* : Dashboard mobile application
+
 ## Overview
 - **Dashboard** : By clicking system status heatmap, which is drawn by instance's CPU status or Heap Usage(Coming soon), you can check User, Top 5 Instance, Top 5 Transaction, Transaction detail on specific time.
 
@@ -33,13 +42,6 @@ Goni is an Open Source APM(Application Performance Management) tool for Go
 * Common data will be saved to [MySQL](https://www.mysql.com/).
 * Dashboard uses [React](https://facebook.github.io/react/).
 
-
-Goni is composed with following projects.
-* [**goniplus**](https://github.com/goniapm/goniplus) : Application metric collector
-* [**goni-sms**](https://github.com/goniapm/goni-sms) *(development suspended)* : Server instance metric collector
-* [**goni-dashboard**](https://github.com/goniapm/goni-dashboard) : Visualize metric from goni-sms / goniplus
-* [**goniplus-worker**](https://github.com/goniapm/goniplus-worker) : Metric handler / processor for goniplus
-* **goni-mobile** *(Coming soon)* : Dashboard mobile application
 
 ## [Quickstart](https://github.com/goniapm/goni/wiki/Quickstart)
 
