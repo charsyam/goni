@@ -14,6 +14,7 @@ type tempMetric struct {
 	// prevCPUMetric saves calculated total, idle value for next calculation
 	prevCPUMetric   localCPUMetric
 	reqBrowserMap   map[string]map[string]uint32
+	reqIDMap        map[string]*Request
 	reqTrackMap     map[string][]string
 	reqTrackTimeMap map[string][]time.Time
 	reqUserMap      map[string]bool
@@ -27,9 +28,10 @@ func GetUnixTimestamp() string {
 
 // GetApplicationMetric returns ApplicationMetric.
 func GetApplicationMetric() *pb.ApplicationMetric {
-	transaction, user := GetTransactionMetric()
+	transaction, realtime, user := GetTransactionMetric()
 	appMetric := &pb.ApplicationMetric{
 		Error:       GetErrorMetric(),
+		Realtime:    realtime,
 		Transaction: transaction,
 		User:        user,
 	}

@@ -34,23 +34,12 @@ type RequestData struct {
 }
 
 var transactionMapLock = &sync.Mutex{}
+var reqIDMapLock = &sync.Mutex{}
 var reqTrackMapLock = &sync.Mutex{}
 var reqTrackTimeMapLock = &sync.Mutex{}
 var reqUserMapLock = &sync.Mutex{}
 
 func initHTTPMap() {
-	// reqMap
-	transactionMapLock.Lock()
-	client.tMetric.transactionMap = make(map[string]*pb.ApplicationMetric_TransactionDetail)
-	transactionMapLock.Unlock()
-	// reqTrackMap
-	reqTrackMapLock.Lock()
-	client.tMetric.reqTrackMap = make(map[string][]string)
-	reqTrackMapLock.Unlock()
-	// reqTrackTimeMap
-	reqTrackTimeMapLock.Lock()
-	client.tMetric.reqTrackTimeMap = make(map[string][]time.Time)
-	reqTrackTimeMapLock.Unlock()
 	// reqUserMap
 	reqUserMapLock.Lock()
 	client.tMetric.reqUserMap = make(map[string]bool)
@@ -58,12 +47,29 @@ func initHTTPMap() {
 }
 
 // GetTransactionMetric returns http metric map.
-func GetTransactionMetric() (*pb.ApplicationMetric_Transaction, []*pb.ApplicationMetric_User) {
+func GetTransactionMetric() (*pb.ApplicationMetric_Transaction, []*pb.ApplicationMetric_Realtime, []*pb.ApplicationMetric_User) {
 	transactionMapLock.Lock()
 	reqUserMapLock.Lock()
+	reqIDMapLock.Lock()
 	var transactionMetric []*pb.ApplicationMetric_TransactionDetail
-	for _, v := range client.tMetric.transactionMap {
+	for k, v := range client.tMetric.transactionMap {
 		transactionMetric = append(transactionMetric, v)
+		delete(client.tMetric.transactionMap, k)
+	}
+	var realtimeMap map[int64]int64
+	var realtimeMetric []*pb.ApplicationMetric_Realtime
+	for _, v := range client.tMetric.reqIDMap {
+		k := int64(time.Since(v.start)*time.Millisecond) / 50
+		if k > 60 {
+			k = 60
+		}
+		realtimeMap[k]++
+	}
+	for k, v := range realtimeMap {
+		realtimeMetric = append(realtimeMetric, &pb.ApplicationMetric_Realtime{
+			Timegroup: k,
+			Count:     v,
+		})
 	}
 	var userMetric []*pb.ApplicationMetric_User
 	for user := range client.tMetric.reqUserMap {
@@ -71,10 +77,11 @@ func GetTransactionMetric() (*pb.ApplicationMetric_Transaction, []*pb.Applicatio
 			Ip: user,
 		})
 	}
+	reqIDMapLock.Unlock()
 	reqUserMapLock.Unlock()
 	transactionMapLock.Unlock()
 	initHTTPMap()
-	return &pb.ApplicationMetric_Transaction{Detail: transactionMetric}, userMetric
+	return &pb.ApplicationMetric_Transaction{Detail: transactionMetric}, realtimeMetric, userMetric
 }
 
 // CreateRequestID returns request id (string) for request tracking
@@ -97,7 +104,7 @@ func StartRequestTrack(r *http.Request) *Request {
 	}
 	// Add id to request header for tracking breadcrumb inside request
 	r.Header.Add("Goni-tracking-id", req.id)
-	// TODO : Add id to task queue for current request graph
+	client.tMetric.reqIDMap[req.id] = req
 	return req
 }
 
@@ -127,7 +134,10 @@ func (r *Request) FinishRequestTrack(status int, panic bool) {
 }
 
 func (r *Request) addRequestData(panic bool) {
-	reqKey := r.method + " " + r.path
+	reqIDMapLock.Lock()
+	delete(client.tMetric.reqIDMap, r.id)
+	reqIDMapLock.Unlock()
+	reqKey := fmt.Sprintf("%s (%s)", r.path, r.method)
 	// UserAgent
 	ua := user_agent.New(r.userAgent)
 	browserName, browserVersion := ua.Browser()
@@ -166,8 +176,10 @@ func (r *Request) addRequestData(panic bool) {
 	transactionMapLock.Lock()
 	if _, ok := client.tMetric.transactionMap[reqKey]; !ok {
 		client.tMetric.transactionMap[reqKey] = &pb.ApplicationMetric_TransactionDetail{
-			Path: reqKey,
-			Data: make([]*pb.ApplicationMetric_TransactionData, 0),
+			Path:     reqKey,
+			Data:     make([]*pb.ApplicationMetric_TransactionData, 0),
+			Method:   r.method,
+			Realpath: r.path,
 		}
 	}
 	detail := client.tMetric.transactionMap[reqKey]
