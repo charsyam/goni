@@ -118,7 +118,9 @@ func sendSlackNotification(metric *pb.Metric) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	httpClient := &http.Client{}
-	_, err = httpClient.Do(req)
+	req.Close = true
+	res, err := httpClient.Do(req)
+	res.Body.Close()
 	if err != nil {
 		log.Println(err)
 	}
