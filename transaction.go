@@ -74,7 +74,7 @@ func GetTransactionMetric() (*pb.ApplicationMetric_Transaction, []*pb.Applicatio
 		transactionMetric = append(transactionMetric, v)
 		delete(client.tMetric.transactionMap, k)
 	}
-	var realtimeMap map[int64]int64
+	realtimeMap := make(map[int64]int64)
 	var realtimeMetric []*pb.ApplicationMetric_Realtime
 	for _, v := range client.tMetric.reqIDMap {
 		k := int64(time.Since(v.start)*time.Millisecond) / 50
