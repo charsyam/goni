@@ -51,6 +51,23 @@ func addResource(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints)
 	bp.AddPoint(pt)
 }
 
+func addRealtime(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints) {
+	for _, v := range data.Application.Realtime {
+		tags := map[string]string{
+			"apikey": data.Apikey,
+		}
+		fields := map[string]interface{}{
+			"count":     v.Count,
+			"timegroup": v.Timegroup,
+		}
+		pt, err := influxlib.NewPoint("realtime", tags, fields, timestamp)
+		if err != nil {
+			continue
+		}
+		bp.AddPoint(pt)
+	}
+}
+
 func addRuntime(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints) {
 	tags := map[string]string{
 		"apikey": data.Apikey,
@@ -72,10 +89,12 @@ func addTransaction(data *pb.Metric, bp influxlib.BatchPoints) {
 	for _, transaction := range detail {
 		for _, transactionData := range transaction.Data {
 			tags := map[string]string{
-				"apikey":  data.Apikey,
-				"browser": transactionData.Browser,
-				"path":    transaction.Path,
-				"status":  transactionData.Status.Status,
+				"apikey":   data.Apikey,
+				"browser":  transactionData.Browser,
+				"method":   transaction.Method,
+				"path":     transaction.Path,
+				"realpath": transaction.Realpath,
+				"status":   transactionData.Status.Status,
 			}
 			fields := map[string]interface{}{
 				"res":      transactionData.Status.Duration,
@@ -149,6 +168,7 @@ func insertMetric(data *pb.Metric) {
 	}
 	timestamp := time.Unix(t, 0)
 	addExpvar(data, timestamp, bp)
+	addRealtime(data, timestamp, bp)
 	addResource(data, timestamp, bp)
 	addRuntime(data, timestamp, bp)
 	addUser(data, timestamp, bp)
