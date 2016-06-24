@@ -16,6 +16,8 @@ message ApplicationMetric {
   message TransactionDetail {
     string path = 1;
     repeated TransactionData data = 2;
+    string method = 3;
+    string realpath = 4;
   }
   message TransactionData {
     TransactionStatus status = 1;
@@ -31,9 +33,14 @@ message ApplicationMetric {
   message User {
     string ip = 1;
   }
+  message Realtime {
+    int64 timegroup = 1;
+    int64 count = 2;
+  }
   repeated Error error = 1;
   Transaction transaction = 2;
   repeated User user = 3;
+  repeated Realtime realtime = 4;
 }
 
 message SystemMetric {
