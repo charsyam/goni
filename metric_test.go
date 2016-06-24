@@ -28,7 +28,7 @@ var _ = Describe("Metric", func() {
 		It("should clear application metric map", func() {
 			GetApplicationMetric()
 			Expect(len(GetErrorMetric())).To(Equal(0))
-			transactionMetric, userMetric := GetTransactionMetric()
+			transactionMetric, _, userMetric := GetTransactionMetric()
 			Expect(len(transactionMetric.Detail)).To(Equal(0))
 			Expect(len(userMetric)).To(Equal(0))
 		})

@@ -39,7 +39,25 @@ var reqTrackMapLock = &sync.Mutex{}
 var reqTrackTimeMapLock = &sync.Mutex{}
 var reqUserMapLock = &sync.Mutex{}
 
-func initHTTPMap() {
+func initHTTPMap(forceInit bool) {
+	if forceInit {
+		// reqMap
+		transactionMapLock.Lock()
+		client.tMetric.transactionMap = make(map[string]*pb.ApplicationMetric_TransactionDetail)
+		transactionMapLock.Unlock()
+		// reqIDMap
+		reqIDMapLock.Lock()
+		client.tMetric.reqIDMap = make(map[string]*Request)
+		reqIDMapLock.Unlock()
+		// reqTrackMap
+		reqTrackMapLock.Lock()
+		client.tMetric.reqTrackMap = make(map[string][]string)
+		reqTrackMapLock.Unlock()
+		// reqTrackTimeMap
+		reqTrackTimeMapLock.Lock()
+		client.tMetric.reqTrackTimeMap = make(map[string][]time.Time)
+		reqTrackTimeMapLock.Unlock()
+	}
 	// reqUserMap
 	reqUserMapLock.Lock()
 	client.tMetric.reqUserMap = make(map[string]bool)
@@ -80,7 +98,7 @@ func GetTransactionMetric() (*pb.ApplicationMetric_Transaction, []*pb.Applicatio
 	reqIDMapLock.Unlock()
 	reqUserMapLock.Unlock()
 	transactionMapLock.Unlock()
-	initHTTPMap()
+	initHTTPMap(false)
 	return &pb.ApplicationMetric_Transaction{Detail: transactionMetric}, realtimeMetric, userMetric
 }
 

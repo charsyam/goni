@@ -54,7 +54,7 @@ func InitSDK(apikey string, interval int) *Client {
 		&tempMetric{},
 	}
 	initErrMap()
-	initHTTPMap()
+	initHTTPMap(true)
 	go client.startSender()
 	return client
 }
