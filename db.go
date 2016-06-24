@@ -54,11 +54,11 @@ func addResource(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints)
 func addRealtime(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints) {
 	for _, v := range data.Application.Realtime {
 		tags := map[string]string{
-			"apikey": data.Apikey,
+			"apikey":    data.Apikey,
+			"timegroup": strconv.FormatInt(v.Timegroup, 10),
 		}
 		fields := map[string]interface{}{
-			"count":     v.Count,
-			"timegroup": v.Timegroup,
+			"count": v.Count,
 		}
 		pt, err := influxlib.NewPoint("realtime", tags, fields, timestamp)
 		if err != nil {
