@@ -17,7 +17,8 @@ func addExpvar(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints) {
 		return
 	}
 	tags := map[string]string{
-		"apikey": data.Apikey,
+		"apikey":   data.Apikey,
+		"instance": data.Instance,
 	}
 	fields := map[string]interface{}{
 		"alloc":        memstats["Alloc"],
@@ -26,7 +27,6 @@ func addExpvar(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints) {
 		"heapinuse":    memstats["HeapInuse"],
 		"pausetotalns": memstats["PauseTotalNs"],
 		"numgc":        memstats["NumGC"],
-		"instance":     data.Instance,
 	}
 	pt, err := influxlib.NewPoint("expvar", tags, fields, timestamp)
 	if err != nil {
@@ -70,12 +70,12 @@ func addRealtime(data *pb.Metric, bp influxlib.BatchPoints) {
 
 func addRuntime(data *pb.Metric, timestamp time.Time, bp influxlib.BatchPoints) {
 	tags := map[string]string{
-		"apikey": data.Apikey,
+		"apikey":   data.Apikey,
+		"instance": data.Instance,
 	}
 	fields := map[string]interface{}{
 		"cgo":       data.System.Runtime.Cgo,
 		"goroutine": data.System.Runtime.Goroutine,
-		"instance":  data.Instance,
 	}
 	pt, err := influxlib.NewPoint("runtime", tags, fields, timestamp)
 	if err != nil {
