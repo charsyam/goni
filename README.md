@@ -26,14 +26,14 @@ Goni+ can collect
 
 Some metrics can be collected manually.
 * Breadcrumb (HTTP request track)
-  * [Guide](https://github.com/goniapm/goni/wiki/goniplus#transaction-tracking) 
+  * [Guide](https://github.com/goniapm/goni/wiki/Transaction-Trace) 
 * Error
 
 ## Middleware Support
 Goni is specialized to web application monitoring, so Goni+ supports multiple web frameworks. Supported web frameworks are listed below.
 
-* [net/http](https://github.com/goniapm/goni/wiki/Quickstart_nethttp)
-* [Gin](https://github.com/goniapm/goni/wiki/Quickstart_gin)
+* [net/http](https://github.com/goniapm/goni/wiki/Transaction-Trace#nethttp)
+* [Gin](https://github.com/goniapm/goni/wiki/Transaction-Trace#gin)
 
 ## Links
 * [Goni](https://github.com/goniapm/goni)
