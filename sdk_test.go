@@ -38,7 +38,9 @@ var _ = Describe("Sdk", func() {
 	})
 	Describe("Set option", func() {
 		It("setMetricURL should change metric url", func() {
-			Expect(client.apikey).To(Equal("APIKEY"))
+			url := "testUrl"
+			client.SetMetricURL(url)
+			Expect(metricURL).To(Equal(url))
 		})
 	})
 })
