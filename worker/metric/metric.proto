@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+message ApplicationMetric {
+  message Breadcrumb {
+    repeated string tag = 1;
+    repeated int64 tagT = 2;
+  }
+  message Error {
+    string tag = 1;
+    string log = 2;
+    string timestamp = 3;
+  }
+  message Transaction {
+    repeated TransactionDetail detail = 1;
+  }
+  message TransactionDetail {
+    string path = 1;
+    repeated TransactionData data = 2;
+    string method = 3;
+    string realpath = 4;
+  }
+  message TransactionData {
+    TransactionStatus status = 1;
+    string browser = 2;
+    Breadcrumb breadcrumb = 3;
+  }
+  message TransactionStatus {
+    string status = 1;
+    int64 duration = 2;
+    bool panic = 3;
+    string timestamp = 4;
+  }
+  message User {
+    string ip = 1;
+  }
+  message Realtime {
+    int64 timegroup = 1;
+    int64 count = 2;
+  }
+  repeated Error error = 1;
+  Transaction transaction = 2;
+  repeated User user = 3;
+  repeated Realtime realtime = 4;
+}
+
+message SystemMetric {
+  message Resource {
+    double cpu = 1;
+  }
+  message Runtime {
+    int64 cgo = 1;
+    int32 goroutine = 2;
+  }
+  map<string, string> expvar = 1;
+  Resource resource = 2;
+  Runtime runtime = 3;
+}
+
+message Metric {
+  string apikey = 1;
+  string instance = 2;
+  string timestamp = 3;
+  ApplicationMetric application = 4;
+  SystemMetric system = 5;
+}
