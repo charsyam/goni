@@ -1,0 +1,31 @@
+worker:
+  build: ./worker
+  links:
+    - mysql
+    - influx
+  ports:
+    - "9900:9900"
+  restart: always
+
+dashboard:
+  build: ./dashboard
+  links:
+    - mysql
+    - influx
+  ports:
+    - "8080:8080"
+  restart: always
+
+mysql:
+  build: ./mysql
+  expose:
+    - 3306
+
+influx:
+  image: tutum/influxdb:0.9
+  expose:
+    - 8086
+  environment:
+    - ADMIN_USER=goni
+    - INFLUXDB_INIT_PWD=goni
+    - PRE_CREATE_DB="goniplus"
