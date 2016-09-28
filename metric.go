@@ -2,7 +2,7 @@ package goniplus
 
 import (
 	"github.com/golang/protobuf/proto"
-	pb "github.com/goniapm/goniplus-worker/metric"
+	pb "github.com/monitflux/goniplus-worker/metric"
 	"strconv"
 	"time"
 )

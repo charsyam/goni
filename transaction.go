@@ -2,7 +2,7 @@ package goniplus
 
 import (
 	"fmt"
-	pb "github.com/goniapm/goniplus-worker/metric"
+	pb "github.com/monitflux/goniplus-worker/metric"
 	"github.com/mssola/user_agent"
 	"net"
 	"net/http"

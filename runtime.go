@@ -1,7 +1,7 @@
 package goniplus
 
 import (
-	pb "github.com/goniapm/goniplus-worker/metric"
+	pb "github.com/monitflux/goniplus-worker/metric"
 	"runtime"
 )
 
