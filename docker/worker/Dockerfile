@@ -10,6 +10,6 @@ ENV GONI_MYSQL_HOST=mysql \
   GONI_INFLUX_PASS=goni
 
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
-RUN wget -O - https://github.com/monitflux/goniplus-worker/releases/download/v0.1-beta4/goniplus-worker-v0.1-beta4-linux-x86_64.tar.gz | tar zxf -
+RUN wget -O - https://github.com/monitflux/goniplus-worker/releases/download/v0.1-beta5/goniplus-worker-v0.1-beta5-linux-x86_64.tar.gz | tar zxf -
 
 CMD ["./goniplus-worker"]
