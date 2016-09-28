@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/proto"
-	pb "github.com/goniapm/goniplus-worker/metric"
+	pb "github.com/monitflux/goniplus-worker/metric"
 	influxlib "github.com/influxdata/influxdb/client/v2"
 	"io/ioutil"
 	"log"

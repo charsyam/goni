@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	pb "github.com/goniapm/goniplus-worker/metric"
+	pb "github.com/monitflux/goniplus-worker/metric"
 	"log"
 	"net/http"
 )

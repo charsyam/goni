@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	pb "github.com/goniapm/goniplus-worker/metric"
+	pb "github.com/monitflux/goniplus-worker/metric"
 	influxlib "github.com/influxdata/influxdb/client/v2"
 	"log"
 	"strconv"
