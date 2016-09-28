@@ -1,7 +1,7 @@
 # goni
-![beta-badge](https://img.shields.io/badge/release-beta-yellow.svg) [![wiki-badge](https://img.shields.io/badge/github-wiki-blue.svg)](https://github.com/goniapm/goni/wiki)
+![beta-badge](https://img.shields.io/badge/release-beta-yellow.svg) [![wiki-badge](https://img.shields.io/badge/github-wiki-blue.svg)](https://github.com/monitflux/goni/wiki)
 
-Document : [Korean](https://github.com/goniapm/goni/blob/master/README_ko.md)
+Document : [Korean](https://github.com/monitflux/goni/blob/master/README_ko.md)
 
 ![logo](./resource/logo.png)
 
@@ -10,11 +10,11 @@ Goni is an Open Source APM(Application Performance Management) tool for Go
 ## Source code
 
 Goni is composed with following projects. You can check source code in each repository.
-* [**goniplus**](https://github.com/goniapm/goniplus) : Application metric collector
-* [**goni-sms**](https://github.com/goniapm/goni-sms) *(development suspended)* : Server instance metric collector
-* [**goni-dashboard**](https://github.com/goniapm/goni-dashboard) : Visualize metric from goni-sms / goniplus
-* [**goniplus-worker**](https://github.com/goniapm/goniplus-worker) : Metric handler / processor for goniplus
-* [**goni-mobile**](https://github.com/goniapm/goni-mobile) : Dashboard mobile application
+* [**goniplus**](https://github.com/monitflux/goniplus) : Application metric collector
+* [**goni-sms**](https://github.com/monitflux/goni-sms) *(development suspended)* : Server instance metric collector
+* [**goni-dashboard**](https://github.com/monitflux/goni-dashboard) : Visualize metric from goni-sms / goniplus
+* [**goniplus-worker**](https://github.com/monitflux/goniplus-worker) : Metric handler / processor for goniplus
+* [**goni-mobile**](https://github.com/monitflux/goni-mobile) : Dashboard mobile application
 
 ## Overview
 - **Dashboard** : By clicking system status heatmap, which is drawn by instance's CPU status or Heap Usage(Coming soon), you can check User, Top 5 Instance, Top 5 Transaction, Transaction detail on specific time.
@@ -43,10 +43,10 @@ Goni is composed with following projects. You can check source code in each repo
 * Dashboard uses [React](https://facebook.github.io/react/).
 
 
-## [Quickstart](https://github.com/goniapm/goni/wiki/Quickstart)
+## [Quickstart](https://github.com/monitflux/goni/wiki/Quickstart)
 
 ## Issue
-If you have an issue, problem, question, please upload it to [here](https://github.com/goniapm/goni/issues).
+If you have an issue, problem, question, please upload it to [here](https://github.com/monitflux/goni/issues).
 
 ## Contribution
 Contribution is always welcomed :D

@@ -1,5 +1,5 @@
 # goni
-![beta-badge](https://img.shields.io/badge/release-beta-yellow.svg) [![wiki-badge](https://img.shields.io/badge/github-wiki-blue.svg)](https://github.com/goniapm/goni/wiki)
+![beta-badge](https://img.shields.io/badge/release-beta-yellow.svg) [![wiki-badge](https://img.shields.io/badge/github-wiki-blue.svg)](https://github.com/monitflux/goni/wiki)
 
 ![logo](./resource/logo.png)
 
@@ -8,10 +8,10 @@ Goni는 Go언어를 위한 오픈소스 APM(Application Performance Management) 
 ## Source code
 
 Goni는 다음 프로젝트들로 이루어져있습니다. 해당 Repository에서 소스코드를 확인하실 수 있습니다.
-* [**goniplus**](https://github.com/goniapm/goniplus) : Application 내부에서 Metric을 수집하고, Worker에게 전송하는 Metric Collector입니다.
-* [**goni-sms**](https://github.com/goniapm/goni-sms) *(개발 중단)* : Application 외부에서 Metric을 수집하고, Worker에게 전송하는 Metric Collector입니다.
-* [**goni-dashboard**](https://github.com/goniapm/goni-dashboard) : goni-sms / goniplus에서 수집한 Metric을 보여주는 Dashboard입니다.
-* [**goniplus-worker**](https://github.com/goniapm/goniplus-worker) : goniplus가 전송하는 Metric을 받아서 처리하는 Worker입니다.
+* [**goniplus**](https://github.com/monitflux/goniplus) : Application 내부에서 Metric을 수집하고, Worker에게 전송하는 Metric Collector입니다.
+* [**goni-sms**](https://github.com/monitflux/goni-sms) *(개발 중단)* : Application 외부에서 Metric을 수집하고, Worker에게 전송하는 Metric Collector입니다.
+* [**goni-dashboard**](https://github.com/monitflux/goni-dashboard) : goni-sms / goniplus에서 수집한 Metric을 보여주는 Dashboard입니다.
+* [**goniplus-worker**](https://github.com/monitflux/goniplus-worker) : goniplus가 전송하는 Metric을 받아서 처리하는 Worker입니다.
 * **goni-mobile** *(추후 공개 예정)* : goni-sms / goniplus에서 수집한 Metric을 모바일에서 간단하게 확인할 수 있는 Application입니다.
 
 ## Overview
@@ -40,10 +40,10 @@ Goni는 다음 프로젝트들로 이루어져있습니다. 해당 Repository에
 * 일반적인 정보(회원 데이터 / 프로젝트 설정)는 [MySQL](https://www.mysql.com/)에 저장합니다.
 * Frontend는 [React](https://facebook.github.io/react/)를 사용합니다.
 
-## [Quickstart](https://github.com/goniapm/goni/wiki/Quickstart)
+## [Quickstart](https://github.com/monitflux/goni/wiki/Quickstart)
 
 ## Issue
-사용시 문제점 / 궁금하신 점이 있으시면 [여기](https://github.com/goniapm/goni/issues)에 이슈를 남겨주세요.
+사용시 문제점 / 궁금하신 점이 있으시면 [여기](https://github.com/monitflux/goni/issues)에 이슈를 남겨주세요.
 
 ## Contribution
 Goni를 개선해주세요! Contribution은 언제나 환영합니다 :D
