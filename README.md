@@ -1,7 +1,7 @@
 # goniplus
 Application metric collector for [Goni](https://github.com/monitflux/goni)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/goniapm/goniplus)](https://goreportcard.com/report/github.com/goniapm/goniplus) [![Build Status](https://travis-ci.org/goniapm/goniplus.svg?branch=develop)](https://travis-ci.org/goniapm/goniplus) [![godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/goniapm/goniplus) [![codecov](https://codecov.io/gh/goniapm/goniplus/branch/develop/graph/badge.svg)](https://codecov.io/gh/goniapm/goniplus)
+[![Go Report Card](https://goreportcard.com/badge/github.com/monitflux/goniplus)](https://goreportcard.com/report/github.com/monitflux/goniplus) [![Build Status](https://travis-ci.org/monitflux/goniplus.svg?branch=develop)](https://travis-ci.org/monitflux/goniplus) [![godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/monitflux/goniplus) [![codecov](https://codecov.io/gh/monitflux/goniplus/branch/develop/graph/badge.svg)](https://codecov.io/gh/monitflux/goniplus)
 
 ## Install
 
