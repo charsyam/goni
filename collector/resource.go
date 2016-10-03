@@ -1,6 +1,6 @@
 package goniplus
 
-import pb "github.com/goniapm/goniplus-worker/metric"
+import pb "github.com/monitflux/goniplus-worker/metric"
 
 // GetResource returns resource metric
 func GetResource() *pb.SystemMetric_Resource {

@@ -2,7 +2,7 @@ package goniplus_test
 
 import (
 	"encoding/json"
-	. "github.com/goniapm/goniplus"
+	. "github.com/monitflux/goniplus"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
