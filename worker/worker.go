@@ -2,7 +2,7 @@
 
 package main
 
-import pb "github.com/goniapm/goniplus-worker/metric"
+import pb "github.com/monitflux/goniplus-worker/metric"
 
 const (
 	typeDB = iota
