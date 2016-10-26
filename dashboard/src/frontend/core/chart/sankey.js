@@ -1,5 +1,8 @@
 /* eslint no-param-reassign:0, no-loop-func:0, no-use-before-define:0
     no-shadow:0, no-floating-decimal:0, no-unused-vars:0 */
+// https://github.com/d3/d3-sankey/blob/master/LICENSE
+// Copyright 2015, Mike Bostock
+// All rights reserved.
 // https://github.com/d3/d3-plugins/blob/master/sankey/sankey.js
 // http://bl.ocks.org/soxofaan/bb6f91d57dc4b6afe91d
 // import d3 / es5 => es6

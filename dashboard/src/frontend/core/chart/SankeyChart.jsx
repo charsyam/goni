@@ -1,4 +1,7 @@
 // https://github.com/nickbalestra/sankey/blob/master/app/SankeyChart.js
+// https://github.com/d3/d3-sankey/blob/master/LICENSE
+// Copyright 2015, Mike Bostock
+// All rights reserved.
 import React from 'react';
 import ReactFauxDOM from 'react-faux-dom';
 import d3 from './sankey';
